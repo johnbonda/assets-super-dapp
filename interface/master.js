@@ -62,10 +62,10 @@ app.route.post('/user/wallet',async function(req,cb){
 });
 app.route.post('/user/balance',async function(req,cb){
    var params={
-    "belrium-token":req.query.belriumtoken,
-    "address":req.query.address
+    address:req.query.address
    }
-   var response=await SwaggerCall.call('POST',`/api/v1/balance`,params);
+ var token=req.query.belriumtoken,
+   var response=await hlCall.call('POST',`/api/v1/balance`,token,params);
    return response;
 });
 app.route.post('/user/kycstatus',async function(req,cb){
@@ -73,4 +73,5 @@ app.route.post('/user/kycstatus',async function(req,cb){
     var response=await headerCall.call('GET',`/api/v1/user/countries/kyc`,belriumtoken);
     return response;
 });
+
 
