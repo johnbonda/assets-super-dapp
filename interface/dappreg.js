@@ -36,13 +36,13 @@ app.route.post('/dappreg', async function (req, res) {
     var response1 = await dappCall.call('POST', `/api/dapps/install`, install_params);
     console.log(JSON.stringify(response1));
     if(response1 && !response1.success) {
-      return "failed in install";        
+      return response1;        
     }
     else{
         var response2 = await dappCall.call('POST', `/api/dapps/launch`, install_params);
       console.log(JSON.stringify(response2)); 
     if(response2 && !response2.success) {
-        return "failed in launch";   
+        return response2;   
     }
     else{
         console.log("registered");
