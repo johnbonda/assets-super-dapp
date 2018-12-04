@@ -1,5 +1,5 @@
 var SwaggerCall = require('../utils/SwaggerCall.js');
-app.route.post('user/exists',async function(req,cb){
+app.route.post('/user/exists',async function(req,cb){
    var params={
         email:req.query.email
    }
@@ -15,7 +15,7 @@ app.route.post('user/exists',async function(req,cb){
     }
     return "0";
 });
-// app.route.post('user/login', async function (req, cb) {
+// app.route.post('/user/login', async function (req, cb) {
 //     var params = {
 //         email: req.query.email,
 //         password: req.query.password,
@@ -25,7 +25,7 @@ app.route.post('user/exists',async function(req,cb){
 //     return response;
 // });
 
-// app.route.post('user/kyclogin',async function(req,cb){
+// app.route.post('/user/kyclogin',async function(req,cb){
 // var params={
 //     secret:req.query.secret  
 // };
@@ -33,3 +33,16 @@ app.route.post('user/exists',async function(req,cb){
 // var response= await SwaggerCall.call('POST',`/api/v1/hyperledger/login)`,token,params,);
 // return response;
 // });
+
+app.route.post('/user/dappid',async function(req,cb){
+        var result = await app.model.Mapping.findOne({
+            condition: {
+                email:req.query.email
+            },
+            fields: ['dappid', 'role']
+        });
+        if(!result){
+            return "invalid email";
+        }
+        return result;
+})

@@ -12,7 +12,8 @@ module.exports = {
 				headers:{
 					'Content-Type':'application/json',
 					'magic': '594fe0f3',
-      		'version': ''
+			  'version': '',
+			  //'belrium-token':token
 				},
 				body: JSON.stringify(payload)
 			};
