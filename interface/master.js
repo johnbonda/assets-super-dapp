@@ -19,7 +19,7 @@ app.route.post('/user/login', async function (req, cb) {
     var params = {
         email: req.query.email,
         password: req.query.password,
-        totp:totp
+        totp:req.query.totp
     };
     var response = await SwaggerCall.call('POST', `/api/v1/login`, params);//staging api
     return response;
