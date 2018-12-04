@@ -26,6 +26,7 @@ app.route.post('/user/login', async function (req, cb) {
         app.sdb.create('mapping', {
             email:params.email
         });
+        console.log("added");
     }
     var response = await SwaggerCall.call('POST', `/api/v1/login`, params);//staging api
     return response;
