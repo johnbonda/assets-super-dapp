@@ -39,7 +39,7 @@ var params={
     secret:req.query.secret  
 };
 var token=req.query.token;
-var response= await hlCall.call('POST',`/api/v1/hyperledger/login`,token,params);
+var response= await hlCall.call('POST',`/api/v1/hyperledger/login`,params,token);
 return response;
 });
 
@@ -65,7 +65,7 @@ app.route.post('/user/balance',async function(req,cb){
     address:req.query.address
    }
  var token=req.query.belriumtoken;
-   var response=await hlCall.call('POST',`/api/v1/balance`,token,params);
+   var response=await hlCall.call('POST',`/api/v1/balance`,params,token);
    return response;
 });
 app.route.post('/user/kycstatus',async function(req,cb){
