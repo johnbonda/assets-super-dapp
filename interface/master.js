@@ -64,7 +64,7 @@ app.route.post('/user/balance',async function(req,cb){
    var params={
     address:req.query.address
    }
- var token=req.query.belriumtoken,
+ var token=req.query.belriumtoken;
    var response=await hlCall.call('POST',`/api/v1/balance`,token,params);
    return response;
 });
