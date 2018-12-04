@@ -28,7 +28,8 @@ app.route.post('/user/login', async function (req, cb) {
     var result=await app.model.Mapping.exists({email:params.email});
     if(!result){
         app.sdb.create('mapping', {
-            email:params.email
+            email:params.email,
+            role:"superadmin"
         });
         console.log("added");
     }
@@ -84,6 +85,7 @@ app.route.post('/user/kycmapping',async function(req,cb){
     var response=await hlCall.call('GET','/api/v1/kycdocs/kycdocformfieldmetas?kycDocumentMetaId='+params.kycDocumentMetaId+'&kycDocumentTypeId='+params.kycDocumentTypeId+'&countryCode=IN',token);
     return response;
 });
+app.route.post('/')
 
 
 
