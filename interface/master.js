@@ -1,6 +1,6 @@
 var SwaggerCall = require('../utils/SwaggerCall.js');
-var hlCall=require('../utils/hlCall');
-var headerCall=require('../utils/headerCall');
+var hlCall=require('../utils/hlCall.js');
+var headerCall=require('../utils/headerCall.js');
 app.route.post('/user/exists',async function(req,cb){
    var params={
         email:req.query.email
@@ -65,7 +65,7 @@ app.route.post('/user/balance',async function(req,cb){
     address:req.query.address
    }
  var token=req.query.belriumtoken;
-   var response=await hlCall.call('POST',`/api/v1/balance`,params,token);
+   var response=await hlCall.call('GET',`/api/v1/balance`,params,token);
    return response;
 });
 app.route.post('/user/kycstatus',async function(req,cb){
