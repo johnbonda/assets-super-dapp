@@ -1,7 +1,6 @@
 var SwaggerCall = require('../utils/SwaggerCall.js');
 var hlCall=require('../utils/hlCall');
 var headerCall=require('../utils/headerCall');
-
 app.route.post('/user/exists',async function(req,cb){
    var params={
         email:req.query.email
@@ -63,10 +62,15 @@ app.route.post('/user/wallet',async function(req,cb){
 });
 app.route.post('/user/balance',async function(req,cb){
    var params={
-    belrium-token:req.query.belrium-token,
-    address:req.query.address
+    "belrium-token":req.query.belriumtoken,
+    "address":req.query.address
    }
-   var response=await headerCall.call('POST',`/api/v1/balance`,params)
+   var response=await SwaggerCall.call('POST',`/api/v1/balance`,params);
+   return response;
 });
-app.route.
+app.route.post('/user/kycstatus',async function(req,cb){
+    var belriumtoken = req.query.belriumtoken;
+    var response=await headerCall.call('GET',`/api/v1/user/countries/kyc`,belriumtoken);
+    return response;
+});
 
