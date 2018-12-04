@@ -23,7 +23,7 @@ app.route.post('/dappreg', async function (req, res) {
     console.log(JSON.stringify(response)); 
     if(response && !response.success) {
         console.log("failed");
-      return "response";   
+      return response;   
     }
     else if(response.success===true){
     var dappid=response.transaction.id;
