@@ -1,4 +1,7 @@
 var SwaggerCall = require('../utils/SwaggerCall.js');
+var hlCall=require('../utils/hlCall');
+var headerCall=require('../utils/headerCall');
+
 app.route.post('/user/exists',async function(req,cb){
    var params={
         email:req.query.email
@@ -32,12 +35,12 @@ app.route.post('/user/login', async function (req, cb) {
     return response;
 });
 
-app.route.post('/user/kyclogin',async function(req,cb){
+app.route.post('/user/hllogin',async function(req,cb){
 var params={
     secret:req.query.secret  
 };
 var token=req.query.token;
-var response= await SwaggerCall.call('POST',`/api/v1/hyperledger/login)`,token,params,);
+var response= await hlCall.call('POST',`/api/v1/hyperledger/login`,token,params);
 return response;
 });
 
@@ -53,4 +56,17 @@ app.route.post('/user/dappid',async function(req,cb){
         }
         return result;
 });
-app.route.post('')
+app.route.post('/user/wallet',async function(req,cb){
+    var token=req.query.token
+    var result=await headerCall.call('GET',`/api/v1/wallets`,token);
+    return result;
+});
+app.route.post('/user/balance',async function(req,cb){
+   var params={
+    belrium-token:req.query.belrium-token,
+    address:req.query.address
+   }
+   var response=await headerCall.call('POST',`/api/v1/balance`,params)
+});
+app.route.
+
