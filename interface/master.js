@@ -21,6 +21,12 @@ app.route.post('/user/login', async function (req, cb) {
         password: req.query.password,
         totp:req.query.totp
     };
+    var result=await app.model.Mapping.exists({email:params.email});
+    if(!result){
+        app.sdb.create('mapping', {
+            email:params.email
+        });
+    }
     var response = await SwaggerCall.call('POST', `/api/v1/login`, params);//staging api
     return response;
 });
@@ -45,4 +51,5 @@ app.route.post('/user/dappid',async function(req,cb){
             return "invalid email";
         }
         return result;
-})
+});
+app.route.post('')

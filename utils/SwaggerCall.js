@@ -4,7 +4,7 @@ var request = require('request');
 var constants = require('./constants.js');
 const URL = constants.URL;
 module.exports = {
-	call: async function(method, url_path, payload, cb){
+	call: async function(method, url_path,token, payload, cb){
 		return new Promise((resolve, reject) => {
 			var options = {
 				method: method,
@@ -13,7 +13,7 @@ module.exports = {
 					'Content-Type':'application/json',
 					'magic': '594fe0f3',
 			  'version': '',
-			  //'belrium-token':token
+			  'belrium-token':token
 				},
 				body: JSON.stringify(payload)
 			};
