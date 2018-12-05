@@ -10,7 +10,7 @@ app.route.post('/user/exists',async function(req,cb){
    var result=await app.model.Mapping.exists(params);
    if(!result){
         var response = await SwaggerCall.call('GET', '/api/v1/user/exist?email=' + params.email, params);  //staging api
-        if(response && !response.success){
+        if(response && !response.isSuccess){
              return "-1";
         }
         else {
@@ -25,17 +25,23 @@ app.route.post('/user/login', async function (req, cb) {
         password: req.query.password,
         totp:req.query.totp
     };
-    var result=await app.model.Mapping.exists({email:params.email});
-    if(!result){
-        app.sdb.create('mapping', {
-            email:params.email,
-            role:"superadmin"
-        });
-        console.log("added");
-    }
     var response = await SwaggerCall.call('POST', '/api/v1/login', params);//staging api
     return response;
 });
+app.route.post('/user/signup', async function (req, cb) {
+    var params = {
+            countryCode: req.query.countryCode,
+            countryId: req.query.countryId,
+            email: req.query.email,
+            lastName: req.query.lastName,
+            name:req.query.name,
+            password:req.query.password,
+            type:req.query.type
+    };
+    var response = await SwaggerCall.call('POST', '/api/v1/signup', params);//staging api
+    return response;
+});
+
 
 app.route.post('/user/hllogin',async function(req,cb){
 var params={
@@ -54,7 +60,7 @@ app.route.post('/user/dappid',async function(req,cb){
             fields: ['dappid', 'role']
         });
         if(!result){
-            return "invalid email";
+            return "new user";
         }
         return result;
 });
@@ -87,12 +93,16 @@ app.route.post('/user/kycmapping',async function(req,cb){
 });
 app.route.post('/rolemapping',async function(req,cb){
     app.sdb.create('mapping', {
-        dappid:req.params.dappid,
-        email:req.params.email,
-        role:req.params.role
+        dappid:req.query.dappid,
+        email:req.query.email,
+        role:req.query.role
     });
 });
-
+app.route.post('/mappingtable',async function(req,cb){
+ var result = await app.model.Mapping.findAll({
+});
+return result;
+});
 
 
 

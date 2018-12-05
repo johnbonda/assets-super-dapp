@@ -82,8 +82,17 @@ app.route.post('/dappreg', async function (req, res) {
         return response2;   
     }
     else{
+        var email=req.query.email;
+            app.sdb.create('mapping', {
+                email:email,
+                role:"superuser"
+            });
         console.log("registered");
-    return "registered";
+        var result={
+            dappid:dappid,
+            response:"registered"
+        }
+    return result;
     }
 }
     }
