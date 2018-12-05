@@ -15,6 +15,12 @@ app.route.post('/dappreg', async function (req, res) {
         return text;
     }
 
+    function sleep(ms){
+        return new Promise(resolve=>{
+            setTimeout(resolve,ms)
+        })
+    }
+
     var randomText = getRandomString();
     randomText += ".zip";
 
@@ -45,6 +51,7 @@ app.route.post('/dappreg', async function (req, res) {
       return response;   
     }
     else if(response.success===true){
+    await sleep(5000);
     var dappid=response.transaction.id;
     console.log(response.transaction.id);
     var install_params={
@@ -58,6 +65,7 @@ app.route.post('/dappreg', async function (req, res) {
       return response1;        
     }
     else{
+        await sleep(5000);
         var response2 = await dappCall.call('POST', `/api/dapps/launch`, install_params);
       console.log(JSON.stringify(response2)); 
     if(response2 && !response2.success) {
