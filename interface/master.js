@@ -93,9 +93,9 @@ app.route.post('/user/kycmapping',async function(req,cb){
 });
 app.route.post('/rolemapping',async function(req,cb){
     app.sdb.create('mapping', {
-        dappid:req.params.dappid,
-        email:req.params.email,
-        role:req.params.role
+        dappid:req.query.dappid,
+        email:req.query.email,
+        role:req.query.role
     });
 });
 app.route.post('/mappingtable',async function(req,cb){
