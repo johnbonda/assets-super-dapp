@@ -28,6 +28,20 @@ app.route.post('/user/login', async function (req, cb) {
     var response = await SwaggerCall.call('POST', '/api/v1/login', params);//staging api
     return response;
 });
+app.route.post('/user/signup', async function (req, cb) {
+    var params = {
+            countryCode: req.query.countryCode,
+            countryId: req.query.countryId,
+            email: req.query.email,
+            lastName: req.query.lastName,
+            name:req.query.name,
+            password:req.query.password,
+            type:req.query.type
+    };
+    var response = await SwaggerCall.call('POST', '/api/v1/signup', params);//staging api
+    return response;
+});
+
 
 app.route.post('/user/hllogin',async function(req,cb){
 var params={
