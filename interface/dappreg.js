@@ -26,6 +26,21 @@ app.route.post('/mapAddress', async function(req, cb){
     return 1;
 })
 
+app.route.post('/mapUser', async function(req, cb){
+    var options = {
+        email: req.query.email,
+        dappid: req.query.dappid,
+        role: req.query.role
+    }
+    
+    var check = await app.model.Mapping.exists(options);
+    if(check) return "Already Registered";
+    
+    app.logger.log("About to create a mapping with options: " + JSON.stringify(options));
+    app.sdb.create('mapping', options);
+    return "success";
+})
+
 // app.route.post('/dappreg', async function (req, res) {
 
     
