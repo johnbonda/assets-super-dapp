@@ -68,7 +68,7 @@ app.route.post('/user/balance',async function(req,cb){
     address:req.query.address
    }
  var token=req.query.belriumtoken;
-   var response=await hlCall.call('GET','/api/v1/balance?address='+params.address,token);
+   var response=await headerCall.call('GET','/api/v1/balance?address='+params.address,token);
    return response;
 });
 app.route.post('/user/kycstatus',async function(req,cb){
@@ -82,7 +82,7 @@ app.route.post('/user/kycmapping',async function(req,cb){
     kycDocumentMetaId:req.params.kycDocumentMetaId,
     kycDocumentTypeId:req.params.kycDocumentTypeId
     }
-    var response=await hlCall.call('GET','/api/v1/kycdocs/kycdocformfieldmetas?kycDocumentMetaId='+params.kycDocumentMetaId+'&kycDocumentTypeId='+params.kycDocumentTypeId+'&countryCode=IN',token);
+    var response=await headerCall.call('GET','/api/v1/kycdocs/kycdocformfieldmetas?kycDocumentMetaId='+params.kycDocumentMetaId+'&kycDocumentTypeId='+params.kycDocumentTypeId+'&countryCode=IN',token);
     return response;
 });
 app.route.post('/rolemapping',async function(req,cb){
