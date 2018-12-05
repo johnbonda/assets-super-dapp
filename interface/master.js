@@ -11,7 +11,7 @@ app.route.post('/user/exists',async function(req,cb){
    if(!result){
         var response = await SwaggerCall.call('GET', '/api/v1/user/exist?email=' + params.email, params);  //staging api
         if(response && !response.success){
-             return "-1";
+             return response;
         }
         else {
             return "00";
