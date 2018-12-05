@@ -4,7 +4,7 @@ module.exports = {
       {
         name: 'address',
         type: 'String',
-        length: 256
+        length: 255
       },
       {
         name: 'dappid',

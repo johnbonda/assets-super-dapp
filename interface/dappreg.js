@@ -26,7 +26,58 @@ app.route.post('/mapAddress', async function(req, cb){
     return 1;
 })
 
-app.route.post('/dappreg', async function (req, res) {
+// app.route.post('/dappreg', async function (req, res) {
+
+    
+//     console.log(JSON.stringify(response)); 
+//     if(response && !response.success) {
+//         console.log("failed");
+//       return response;   
+//     }
+//     else if(response.success===true){
+//     console.log("Entering dapp install");
+//     await sleep(5000);
+//     var dappid=response.transaction.id;
+//     console.log(response.transaction.id);
+//     var install_params={
+//             id:dappid,
+//             master:"ytfACAMegjrK"
+//     }
+
+//     var response1 = await dappCall.call('POST', `/api/dapps/install`, install_params);
+//     console.log(JSON.stringify(response1));
+//     if(response1 && !response1.success) {
+//       return response1;        
+//     }
+//     else{
+//         console.log("Entering Dapp launch");
+//         await sleep(5000);
+//         var response2 = await dappCall.call('POST', `/api/dapps/launch`, install_params);
+//       console.log(JSON.stringify(response2)); 
+//     if(response2 && !response2.success) {
+//         return response2;   
+//     }
+//     else{
+//         var email=req.query.email;
+//             app.sdb.create('mapping', {
+//                 email:email,
+//                 role:"superuser"
+//             });
+//         console.log("registered");
+//         var result={
+//             dappid:dappid,
+//             response:"registered"
+//         }
+//     return result;
+//     }
+// }
+//     }
+   
+// });
+
+app.route.post('/registerDApp', async function (req, res) {
+    console.log("Entering dapp registration");
+    app.logger.log("******** Entering dapp registration ********");
 
     function getRandomString() {
         var text = "";
@@ -38,12 +89,6 @@ app.route.post('/dappreg', async function (req, res) {
         text += smalls.charAt(Math.floor(Math.random() * smalls.length));
         }
         return text;
-    }
-
-    function sleep(ms){
-        return new Promise(resolve=>{
-            setTimeout(resolve,ms)
-        })
     }
 
     var randomText = getRandomString();
@@ -69,50 +114,44 @@ app.route.post('/dappreg', async function (req, res) {
         countryCode: "IN"
     };
     console.log(JSON.stringify(dapp_params));
-    var response =await dappCall.call('PUT', `/api/dapps`, dapp_params);
-    console.log(JSON.stringify(response)); 
-    if(response && !response.success) {
-        console.log("failed");
-      return response;   
-    }
-    else if(response.success===true){
-    await sleep(5000);
-    var dappid=response.transaction.id;
-    console.log(response.transaction.id);
+    var response = await dappCall.call('PUT', `/api/dapps`, dapp_params);
+    
+    if(!response.success) return response;
+
+    var email=req.query.email;
+    app.sdb.create('mapping', {
+        email:email,
+        dappid: response.transaction.id,
+        role:"superuser"
+    });
+    return response;
+})
+
+app.route.post('/installDApp', async function (req, res) {
+    console.log("Entering dapp install");
+    app.logger.log("******* Entering dapp install ********");
+
+    var dappid=req.query.id;
     var install_params={
             id:dappid,
             master:"ytfACAMegjrK"
     }
-
-    var response1 = await dappCall.call('POST', `/api/dapps/install`, install_params);
-    console.log(JSON.stringify(response1));
-    if(response1 && !response1.success) {
-      return response1;        
-    }
-    else{
-        await sleep(5000);
-        var response2 = await dappCall.call('POST', `/api/dapps/launch`, install_params);
-      console.log(JSON.stringify(response2)); 
-    if(response2 && !response2.success) {
-        return response2;   
-    }
-    else{
-        var email=req.query.email;
-            app.sdb.create('mapping', {
-                email:email,
-                role:"superuser"
-            });
-        console.log("registered");
-        var result={
-            dappid:dappid,
-            response:"registered"
-        }
-    return result;
-    }
-}
-    }
-   
+    return await dappCall.call('POST', `/api/dapps/install`, install_params);
 });
+
+app.route.post('/launchDApp', async function (req, res) {
+    console.log("Entering dapp launch");
+    app.logger.log("******* Entering dapp launch ********");
+
+    var dappid=req.query.id;
+    var install_params={
+            id:dappid,
+            master:"ytfACAMegjrK"
+    }
+    return await dappCall.call('POST', `/api/dapps/install`, install_params);
+});
+
+
 
 
 // dappid:"2b06d8d5f5b1184e4c2813a3e3dafe389287012ebc7f690e7d26863ad6ed95be"
