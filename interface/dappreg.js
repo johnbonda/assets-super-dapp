@@ -1,6 +1,16 @@
 var dappCall = require('../utils/dappCall');
 
 
+app.route.post('/transactionMapping', async function(req, cb){
+    var address = req.query.address;
+    var result = await app.model.Issueaddr.findAll({
+        condition: {
+            address: address
+        }
+    });
+    return result;
+})
+
 app.route.post('/dappreg', async function (req, res) {
 
     function getRandomString() {
