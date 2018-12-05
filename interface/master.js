@@ -79,8 +79,8 @@ app.route.post('/user/kycstatus',async function(req,cb){
 app.route.post('/user/kycmapping',async function(req,cb){
     var token = req.query.token;
     var params={
-    kycDocumentMetaId:req.params.kycDocumentMetaId,
-    kycDocumentTypeId:req.params.kycDocumentTypeId
+    kycDocumentMetaId:req.query.kycDocumentMetaId,
+    kycDocumentTypeId:req.query.kycDocumentTypeId
     }
     var response=await headerCall.call('GET','/api/v1/kycdocs/kycdocformfieldmetas?kycDocumentMetaId='+params.kycDocumentMetaId+'&kycDocumentTypeId='+params.kycDocumentTypeId+'&countryCode=IN',token);
     return response;
