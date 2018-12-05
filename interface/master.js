@@ -28,8 +28,7 @@ app.route.post('/user/login', async function (req, cb) {
     var result=await app.model.Mapping.exists({email:params.email});
     if(!result){
         app.sdb.create('mapping', {
-            email:params.email,
-            role:"superadmin"
+            email:params.email
         });
         console.log("added");
     }

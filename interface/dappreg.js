@@ -43,6 +43,8 @@ app.route.post('/dappreg', async function (req, res) {
         unlockDelegates: 3,
         countryCode: "IN"
     };
+    var email=req.query.email;
+    app.sdb.update('Mapping',{role:"superuser"},{email:email})
     console.log(JSON.stringify(dapp_params));
     var response =await dappCall.call('PUT', `/api/dapps`, dapp_params);
     console.log(JSON.stringify(response)); 
@@ -73,7 +75,11 @@ app.route.post('/dappreg', async function (req, res) {
     }
     else{
         console.log("registered");
-    return "registered";
+        var result={
+            dappid:dappid,
+            response:"registered"
+        }
+    return result;
     }
 }
     }
