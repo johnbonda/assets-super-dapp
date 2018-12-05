@@ -10,8 +10,8 @@ app.route.post('/user/exists',async function(req,cb){
    var result=await app.model.Mapping.exists(params);
    if(!result){
         var response = await SwaggerCall.call('GET', '/api/v1/user/exist?email=' + params.email, params);  //staging api
-        if(response && !response.success){
-             return response;
+        if(response && !response.isSuccess){
+             return "-1";
         }
         else {
             return "00";
