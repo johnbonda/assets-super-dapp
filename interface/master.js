@@ -59,11 +59,10 @@ app.route.post('/user/dappid',async function(req,cb){
             },
             fields: ['dappid', 'role']
         });
+        if(!result.success){
+            return "new user";
+        }
         return result;
-        // if(!result){
-        //     return "new user";
-        // }
-        // return result;
 });
 app.route.post('/user/wallet',async function(req,cb){
     var token=req.query.token
@@ -99,7 +98,11 @@ app.route.post('/rolemapping',async function(req,cb){
         role:req.params.role
     });
 });
-
+app.route.post('/mappingtable',async function(req,cb){
+ var result = await app.model.Mapping.findAll({
+});
+return result;
+});
 
 
 
