@@ -59,10 +59,11 @@ app.route.post('/user/dappid',async function(req,cb){
             },
             fields: ['dappid', 'role']
         });
-        if(!result){
-            return "new user";
-        }
         return result;
+        // if(!result){
+        //     return "new user";
+        // }
+        // return result;
 });
 app.route.post('/user/wallet',async function(req,cb){
     var token=req.query.token
