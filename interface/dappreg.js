@@ -6,7 +6,7 @@ app.route.post('/dappreg', async function (req, res) {
         name:req.query.name,
         description: req.query.des,
         type: 0,
-        link: "https://github.com/chandinivysyaraju/domain_dapp/archive/master.zip",
+        link: "https://github.com/johnbonda/domain_dapp/archive/master.zip",
         icon: "http://o7dyh3w0x.bkt.clouddn.com/hello.png",
           delegates: [
            "8e5178db2bf10555cb57264c88833c48007100748d593570e013c9b15b17004e",
