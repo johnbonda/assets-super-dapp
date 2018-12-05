@@ -1,7 +1,7 @@
 var dappCall = require('../utils/dappCall');
 
 
-app.route.post('/transactionMapping', async function(req, cb){
+app.route.post('/findDappsByAddress', async function(req, cb){
     var address = req.query.address;
     var result = await app.model.Issueaddr.findAll({
         condition: {
@@ -9,6 +9,21 @@ app.route.post('/transactionMapping', async function(req, cb){
         }
     });
     return result;
+})
+
+app.route.post('/mapAddress', async function(req, cb){
+    var address = req.query.address;
+    var dappid = req.query.dappid;
+    var check = await app.model.Issueaddr.exists({
+        address: address,
+        dappid: dappid
+    });
+    if(check) return 0;
+    app.sdb.create('issueaddr', {
+        address: address,
+        dappid: dappid
+    });
+    return 1;
 })
 
 app.route.post('/dappreg', async function (req, res) {
