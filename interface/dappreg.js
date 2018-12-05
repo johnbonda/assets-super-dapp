@@ -1,12 +1,31 @@
 var dappCall = require('../utils/dappCall');
+
+
 app.route.post('/dappreg', async function (req, res) {
+
+    function getRandomString() {
+        var text = "";
+        var caps = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        var smalls = "abcdefghijklmnopqrstuvwxyz";
+    
+        for (var i = 0; i < 4; i++){
+        text += caps.charAt(Math.floor(Math.random() * caps.length));
+        text += smalls.charAt(Math.floor(Math.random() * smalls.length));
+        }
+        return text;
+    }
+
+    var randomText = getRandomString();
+    randomText += ".zip";
+
+    var link = "http://52.90.71.197/sendzip/" + randomText;
     var dapp_params = {
         secret: req.query.secret,
         category: 1,
         name:req.query.name,
         description: req.query.des,
         type: 0,
-        link: "https://github.com/johnbonda/domain_dapp/archive/master.zip",
+        link: link,
         icon: "http://o7dyh3w0x.bkt.clouddn.com/hello.png",
           delegates: [
            "8e5178db2bf10555cb57264c88833c48007100748d593570e013c9b15b17004e",
