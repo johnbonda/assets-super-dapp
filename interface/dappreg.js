@@ -171,6 +171,12 @@ app.route.post('/launchDApp', module.exports.launchDapp);
 
 app.route.post('/makeDapp', async function(req, cb){
 
+    function sleep(ms){
+        return new Promise(resolve=>{
+            setTimeout(resolve,ms)
+        })
+    }
+
     console.log("Started Dapp Register");
     var dappRegisterResult = await module.exports.registerDapp(req, cb);
     console.log("Dapp register result: " + JSON.stringify(dappRegisterResult));
@@ -188,6 +194,7 @@ app.route.post('/makeDapp', async function(req, cb){
         }
     }
     do{
+        await sleep(1000);
         console.log("Install Attempt: " + ++count);
         var dappInstallResult = await module.exports.installDapp(installreq, 0);
         if(count > 10) return {
@@ -201,6 +208,7 @@ app.route.post('/makeDapp', async function(req, cb){
     count = 0;
 
     do{
+        await sleep(1000);
         console.log("Launch Attempt: " + ++count);
         var dappLaunchResult = await module.exports.launchDapp(installreq, 0);
         if(count > 10) return {
