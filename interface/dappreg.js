@@ -197,7 +197,7 @@ app.route.post('/makeDapp', async function(req, cb){
         await sleep(1000);
         console.log("Install Attempt: " + ++count);
         var dappInstallResult = await module.exports.installDapp(installreq, 0);
-        if(count > 10) return {
+        if(count > 15) return {
             isSuccess: false,
             message: "Failed at Installation with error: " + JSON.stringify(dappInstallResult),
             dappid: installreq.query.id
@@ -211,7 +211,7 @@ app.route.post('/makeDapp', async function(req, cb){
         await sleep(1000);
         console.log("Launch Attempt: " + ++count);
         var dappLaunchResult = await module.exports.launchDapp(installreq, 0);
-        if(count > 10) return {
+        if(count > 15) return {
             isSuccess: false,
             message: "Failed at Launch with error: " + JSON.stringify(dappInstallResult),
             dappid: installreq.query.id
