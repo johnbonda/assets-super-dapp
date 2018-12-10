@@ -118,11 +118,11 @@ module.exports.registerDapp = async function (req, res) {
         link: link,
         icon: "http://o7dyh3w0x.bkt.clouddn.com/hello.png",
         delegates: [
-            "8e5178db2bf10555cb57264c88833c48007100748d593570e013c9b15b17004e",
-            "fd6df6dc35852ac7edcc081eb5195718e0c77a6ad4f8157eeb78c865fa83efc4",
-            "a4818ece5ec06272d4bf8f8a8d161eba008f51db92f27f6510bfac6f4896ebb4",
-            "e5633469e17061c089cef1300a7fc45afe4f753d1c36f9248d9666e07be287bb",
-            "70ca6ade9a7ad92b9ef16b24388bbce97a3dabc85877bc367626b3d906ae0cb3"
+        "db18d5799944030f76b6ce0879b1ca4b0c2c1cee51f53ce9b43f78259950c2fd",
+    	"590e28d2964b0aa4d7c7b98faee4676d467606c6761f7f41f99c52bb4813b5e4",
+    	"bfe511158d674c3a1e21111223a49770bee93611d998e88a5d2ea3145de2b68b",
+    	"7bbf62931cf3c596591a580212631aff51d6bc0577c54769953caadb23f6ab00",
+		"452df9213aedb3b9fed6db3e2ea9f49d3db226e2dac01828bc3dcd73b7a953b4"
         ],
         unlockDelegates: 3,
         countryCode: "IN"
