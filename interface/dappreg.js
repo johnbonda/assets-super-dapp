@@ -216,7 +216,7 @@ app.route.post('/makeDapp', async function(req, cb){
             message: "Failed at Launch with error: " + JSON.stringify(dappInstallResult),
             dappid: installreq.query.id
         }
-    }while(!dappLaunchResult.success);
+    }while(!dappLaunchResult.success || !(dappLaunchResult.error === "Dapp already launched"));
     console.log("Finished Dapp launch");
     return {
         isSuccess: true,
