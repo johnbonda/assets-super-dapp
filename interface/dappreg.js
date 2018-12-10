@@ -194,7 +194,7 @@ app.route.post('/makeDapp', async function(req, cb){
         }
     }
     do{
-        await sleep(1000);
+        await sleep(2000);
         console.log("Install Attempt: " + ++count);
         var dappInstallResult = await module.exports.installDapp(installreq, 0);
         if(count > 15) return {
@@ -208,7 +208,7 @@ app.route.post('/makeDapp', async function(req, cb){
     count = 0;
 
     do{
-        await sleep(1000);
+        await sleep(2000);
         console.log("Launch Attempt: " + ++count);
         var dappLaunchResult = await module.exports.launchDapp(installreq, 0);
         if(count > 15) return {
