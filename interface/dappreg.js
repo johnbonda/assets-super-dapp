@@ -1,6 +1,5 @@
 var dappCall = require('../utils/dappCall');
 
-
 app.route.post('/findDappsByAddress', async function(req, cb){
     var address = req.query.address;
     var result = await app.model.Issueaddr.findAll({
@@ -90,25 +89,25 @@ app.route.post('/mapUser', async function(req, cb){
    
 // });
 
-app.route.post('/registerDApp', async function (req, res) {
+module.exports.registerDapp = async function (req, res) {
     console.log("Entering dapp registration");
     app.logger.log("******** Entering dapp registration ********");
-
+    
     function getRandomString() {
         var text = "";
         var caps = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
         var smalls = "abcdefghijklmnopqrstuvwxyz";
-    
+        
         for (var i = 0; i < 4; i++){
-        text += caps.charAt(Math.floor(Math.random() * caps.length));
-        text += smalls.charAt(Math.floor(Math.random() * smalls.length));
+            text += caps.charAt(Math.floor(Math.random() * caps.length));
+            text += smalls.charAt(Math.floor(Math.random() * smalls.length));
         }
         return text;
     }
-
+    
     var randomText = getRandomString();
     randomText += ".zip";
-
+    
     var link = "http://52.90.71.197/sendzip/" + randomText;
     var dapp_params = {
         secret: req.query.secret,
@@ -118,13 +117,13 @@ app.route.post('/registerDApp', async function (req, res) {
         type: 0,
         link: link,
         icon: "http://o7dyh3w0x.bkt.clouddn.com/hello.png",
-          delegates: [
-           "8e5178db2bf10555cb57264c88833c48007100748d593570e013c9b15b17004e",
-           "fd6df6dc35852ac7edcc081eb5195718e0c77a6ad4f8157eeb78c865fa83efc4",
-           "a4818ece5ec06272d4bf8f8a8d161eba008f51db92f27f6510bfac6f4896ebb4",
-           "e5633469e17061c089cef1300a7fc45afe4f753d1c36f9248d9666e07be287bb",
-           "70ca6ade9a7ad92b9ef16b24388bbce97a3dabc85877bc367626b3d906ae0cb3"
-         ],
+        delegates: [
+        "db18d5799944030f76b6ce0879b1ca4b0c2c1cee51f53ce9b43f78259950c2fd",
+    	"590e28d2964b0aa4d7c7b98faee4676d467606c6761f7f41f99c52bb4813b5e4",
+    	"bfe511158d674c3a1e21111223a49770bee93611d998e88a5d2ea3145de2b68b",
+    	"7bbf62931cf3c596591a580212631aff51d6bc0577c54769953caadb23f6ab00",
+		"452df9213aedb3b9fed6db3e2ea9f49d3db226e2dac01828bc3dcd73b7a953b4"
+        ],
         unlockDelegates: 3,
         countryCode: "IN"
     };
@@ -132,7 +131,7 @@ app.route.post('/registerDApp', async function (req, res) {
     var response = await dappCall.call('PUT', `/api/dapps`, dapp_params);
     
     if(!response.success) return response;
-
+    
     var email=req.query.email;
     app.sdb.create('mapping', {
         email:email,
@@ -140,33 +139,90 @@ app.route.post('/registerDApp', async function (req, res) {
         role:"superuser"
     });
     return response;
-})
+}
 
-app.route.post('/installDApp', async function (req, res) {
+module.exports.installDapp = async function (req, res) {
     console.log("Entering dapp install");
     app.logger.log("******* Entering dapp install ********");
-
+    
     var dappid=req.query.id;
     var install_params={
-            id:dappid,
-            master:"ytfACAMegjrK"
+        id:dappid,
+        master:"ytfACAMegjrK"
     }
     return await dappCall.call('POST', `/api/dapps/install`, install_params);
-});
+}
 
-app.route.post('/launchDApp', async function (req, res) {
+module.exports.launchDapp = async function (req, res) {
     console.log("Entering dapp launch");
     app.logger.log("******* Entering dapp launch ********");
-
+    
     var dappid=req.query.id;
     var install_params={
-            id:dappid,
-            master:"ytfACAMegjrK"
+        id:dappid,
+        master:"ytfACAMegjrK"
     }
-    return await dappCall.call('POST', `/api/dapps/install`, install_params);
+    return await dappCall.call('POST', `/api/dapps/launch`, install_params);
+}
+
+app.route.post('/registerDApp', module.exports.registerDapp);
+app.route.post('/installDApp', module.exports.installDapp);
+app.route.post('/launchDApp', module.exports.launchDapp);
+
+app.route.post('/makeDapp', async function(req, cb){
+
+    function sleep(ms){
+        return new Promise(resolve=>{
+            setTimeout(resolve,ms)
+        })
+    }
+
+    console.log("Started Dapp Register");
+    var dappRegisterResult = await module.exports.registerDapp(req, cb);
+    console.log("Dapp register result: " + JSON.stringify(dappRegisterResult));
+
+    if(!dappRegisterResult) return "No response from Dapp registration call";
+    if(!dappRegisterResult.success) return dappRegisterResult;
+
+    console.log("Dapp successfully registered");
+
+    console.log("About to do Dapp install");
+    var count = 0;
+    var installreq = {
+        query: {
+            id: dappRegisterResult.transaction.id
+        }
+    }
+    do{
+        await sleep(2000);
+        console.log("Install Attempt: " + ++count);
+        var dappInstallResult = await module.exports.installDapp(installreq, 0);
+        if(count > 15) return {
+            isSuccess: false,
+            message: "Failed at Installation with error: " + JSON.stringify(dappInstallResult),
+            dappid: installreq.query.id
+        }
+    }while(!dappInstallResult.success);
+
+    console.log("About to launch dapp");
+    count = 0;
+
+    do{
+        await sleep(2000);
+        console.log("Launch Attempt: " + ++count);
+        var dappLaunchResult = await module.exports.launchDapp(installreq, 0);
+        if(count > 15) return {
+            isSuccess: false,
+            message: "Failed at Launch with error: " + JSON.stringify(dappInstallResult),
+            dappid: installreq.query.id
+        }
+    }while(!dappLaunchResult.success);
+    console.log("Finished Dapp launch");
+    return {
+        isSuccess: true,
+        message: "Successfully Installed",
+        dappid: installreq.query.id
+    }
 });
-
-
-
 
 // dappid:"2b06d8d5f5b1184e4c2813a3e3dafe389287012ebc7f690e7d26863ad6ed95be"
