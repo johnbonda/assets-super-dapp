@@ -13,6 +13,7 @@ module.exports = {
 					'Content-Type':'application/json',
 					'magic': '594fe0f3',
 			  'version': '',
+			  'belrium-token':payload.belriumtoken
 				},
 				body: JSON.stringify(payload)
 			};

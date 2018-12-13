@@ -59,7 +59,7 @@ app.route.post('/user/dappid',async function(req,cb){
             },
             fields: ['dappid', 'role']
         });
-        if(!result){
+        if(!result  ){
             return "new user";
         }
         return result;
