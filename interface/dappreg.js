@@ -108,7 +108,7 @@ module.exports.registerDapp = async function (req, res) {
     var randomText = getRandomString();
     randomText += ".zip";
     
-    var link = "http://52.90.71.197/sendzip/" + randomText;
+    var link = "http://35.175.251.95/sendzip/" + randomText;
     var dapp_params = {
         secret: req.query.secret,
         category: 1,
