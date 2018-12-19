@@ -25,6 +25,20 @@ app.route.post('/mapAddress', async function(req, cb){
     return 1;
 })
 
+app.route.post('/user/getDappsByAddress', async function(req, cb){
+    var resultArray = [];
+    var result = await app.model.Issueaddr.findAll({
+        condition: {
+            address: req.query.address
+        },
+        fields: ['dappid']
+    });
+    for(i in result){
+        resultArray.push(result[i].dappid);
+    }
+    return resultArray;
+});
+
 app.route.post('/mapUser', async function(req, cb){
     var options = {
         email: req.query.email,
