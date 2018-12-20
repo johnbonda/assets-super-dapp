@@ -110,6 +110,15 @@ app.route.post('/mappingtable',async function(req,cb){
 return result;
 });
 
+//- Retreive username, companyname, from email
+app.route.post('/user/companyname',async function(req,cb){
+var email=req.query.email;
+var res=await app.model.Mapping.findOne({ condition:{email:email},fields:['dappid']});
+var response=await app.model.Company.findOne({condition:{dappid:res.dappid},fields:['company','country','name']
+});
+return response;
+});
+
 
 
 

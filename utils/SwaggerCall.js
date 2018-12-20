@@ -1,4 +1,4 @@
-'use strict';
+ 'use strict';
 
 var request = require('request');
 var constants = require('./constants.js');

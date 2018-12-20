@@ -147,10 +147,20 @@ module.exports.registerDapp = async function (req, res) {
     if(!response.success) return response;
     
     var email=req.query.email;
+    var company=req.query.company;
+    var name=req.query.name;
+    var country=req.query.country;
+    var  dappid=response.transaction.id;
     app.sdb.create('mapping', {
         email:email,
-        dappid: response.transaction.id,
+        dappid:dappid,
         role:"superuser"
+    });
+    app.sdb.create('company',{
+        dappid:dappid,
+        company:company,
+        country:country,
+        name:name
     });
     return response;
 }
