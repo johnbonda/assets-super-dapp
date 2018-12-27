@@ -34,9 +34,14 @@ app.route.post('/user/getDappsByAddress', async function(req, cb){
         fields: ['dappid']
     });
     for(i in result){
-        resultArray.push(result[i].dappid);
+        var company = await app.model.Company.findOne({
+            condition: {
+                dappid: result[i].dappid
+            }
+        });
+        result[i].company = company.company;
     }
-    return resultArray;
+    return result;
 });
 
 app.route.post('/mapUser', async function(req, cb){
@@ -248,5 +253,14 @@ app.route.post('/makeDapp', async function(req, cb){
         dappid: installreq.query.id
     }
 });
+
+app.route.post('/mockCompany', async function(req, cb){
+    app.sdb.create('company', {
+        dappid: req.query.dappid,
+        company: req.query.company,
+        country: req.query.country,
+        name: req.query.name
+    });
+})
 
 // dappid:"2b06d8d5f5b1184e4c2813a3e3dafe389287012ebc7f690e7d26863ad6ed95be"
