@@ -68,6 +68,14 @@ app.route.post('/user/dappid',async function(req,cb){
             }
             return result;
         }
+        var company = await app.model.Company.findOne({
+            condition: { 
+                dappid: result.dappid
+            }
+        });
+        for(i in company){
+            result[i] = company[i];
+        }
         return result;
 });
 app.route.post('/user/wallet',async function(req,cb){
