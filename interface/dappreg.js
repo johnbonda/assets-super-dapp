@@ -51,12 +51,19 @@ app.route.post('/mapUser', async function(req, cb){
         role: req.query.role
     }
     
-    var check = await app.model.Mapping.exists(options);
-    if(check) return "Already Registered";
+    var check = await app.model.Mapping.exists({
+        email: req.query.email
+    });
+    if(check) return {
+        message: "Email already Registered with Payroll",
+        isSuccess: false
+    }
     
     app.logger.log("About to create a mapping with options: " + JSON.stringify(options));
     app.sdb.create('mapping', options);
-    return "success";
+    return {
+        isSuccess: true
+    };
 })
 
 // app.route.post('/dappreg', async function (req, res) {
