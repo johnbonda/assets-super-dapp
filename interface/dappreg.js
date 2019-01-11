@@ -263,4 +263,14 @@ app.route.post('/mockCompany', async function(req, cb){
     });
 })
 
+app.route.post('/removeUsers', async function(req, cb){
+    app.sdb.del('mapping', {
+        email: req.query.email,
+        role: req.query.role
+    });
+    return {
+        isSuccess: true
+    }
+})
+
 // dappid:"2b06d8d5f5b1184e4c2813a3e3dafe389287012ebc7f690e7d26863ad6ed95be"
