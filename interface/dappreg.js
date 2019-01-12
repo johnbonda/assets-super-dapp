@@ -273,8 +273,7 @@ app.route.post('/mockCompany', async function(req, cb){
 app.route.post('/removeUsers', async function(req, cb){
     console.log("Here in SuperDapp remove: " + JSON.stringify(req)); 
     app.sdb.del('mapping', {
-        email: req.query.email,
-        role: req.query.role
+        email: req.query.email
     });
     return {
         isSuccess: true
