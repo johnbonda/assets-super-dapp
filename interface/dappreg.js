@@ -134,7 +134,7 @@ module.exports.registerDapp = async function (req, res) {
     var randomText = getRandomString();
     randomText += ".zip";
     
-    var link = "http://52.201.227.220:8080/sendzip/" + randomText;
+    var link = "http://52.201.227.220:8080/localsendzip/" + randomText;
     var dapp_params = {
         secret: req.query.secret,
         category: 1,
@@ -163,16 +163,19 @@ module.exports.registerDapp = async function (req, res) {
     var name=req.query.name;
     var country=req.query.country;
     var  dappid=response.transaction.id;
-    app.sdb.create('mapping', {
-        email:email,
-        dappid:dappid,
-        role:"superuser"
-    });
+    // app.sdb.create('mapping', {
+    //     email:email,
+    //     dappid:dappid,
+    //     role:"superuser"
+    // });
+    app.sdb.update('mapping', {dappid: dappid}, {email: email});
+    app.sdb.update('mapping', {role: 'superuser'}, {email: email});
     app.sdb.create('company',{
         dappid:dappid,
         company:company,
         country:country,
-        name:name
+        name:name,
+        timestampp: new Date().getTime().toString()
     });
     return response;
 }
@@ -279,5 +282,31 @@ app.route.post('/removeUsers', async function(req, cb){
         isSuccess: true
     }
 })
+
+
+ app.route.post('/getPayedPayslip', async function(req, cb){
+     var company = await app.model.Company.findOne({
+         condition: {
+             company: req.query.company
+         },
+         fields: ['dappid']
+     });
+
+     if(!company) return {
+         message: "Invalid company",
+         isSuccess: false
+     }
+
+     var response = await dappCall.call('POST', '/api/dapps/' + company.dappid + '/getPayedPayslip', {pid: req.query.pid});
+
+     if(!response) return {
+         message: "No response from the dapp",
+         isSuccess: false
+     }
+
+     return response;
+     
+ })
+
 
 // dappid:"2b06d8d5f5b1184e4c2813a3e3dafe389287012ebc7f690e7d26863ad6ed95be"

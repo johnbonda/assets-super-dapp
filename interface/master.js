@@ -61,11 +61,13 @@ app.route.post('/user/dappid',async function(req,cb){
             },
             fields: ['dappid', 'role']
         });
-        if(!result  ){
+        if(!result){
             var result={
-                dappid:"",
+                email: req.query.email,
+                dappid:"-",
                 role:"new user"
             }
+            app.sdb.create('mapping', result);
             return result;
         }
         var company = await app.model.Company.findOne({
