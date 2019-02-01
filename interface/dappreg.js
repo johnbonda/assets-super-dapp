@@ -1,4 +1,5 @@
 var dappCall = require('../utils/dappCall');
+var links = require('../utils/constants').links;
 
 app.route.post('/findDappsByAddress', async function(req, cb){
     var address = req.query.address;
@@ -115,26 +116,26 @@ app.route.post('/mapUser', async function(req, cb){
    
 // });
 
+function getRandomString() {
+    var text = "";
+    var caps = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    var smalls = "abcdefghijklmnopqrstuvwxyz";
+    
+    for (var i = 0; i < 4; i++){
+        text += caps.charAt(Math.floor(Math.random() * caps.length));
+        text += smalls.charAt(Math.floor(Math.random() * smalls.length));
+    }
+    return text;
+}
+
 module.exports.registerDapp = async function (req, res) {
     console.log("Entering dapp registration");
     app.logger.log("******** Entering dapp registration ********");
     
-    function getRandomString() {
-        var text = "";
-        var caps = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-        var smalls = "abcdefghijklmnopqrstuvwxyz";
-        
-        for (var i = 0; i < 4; i++){
-            text += caps.charAt(Math.floor(Math.random() * caps.length));
-            text += smalls.charAt(Math.floor(Math.random() * smalls.length));
-        }
-        return text;
-    }
-    
     var randomText = getRandomString();
     randomText += ".zip";
     
-    var link = "http://52.201.227.220:8080/localsendzip/" + randomText;
+    var link = "http://52.201.227.220:8080/sendzip/" + randomText;
     var dapp_params = {
         secret: req.query.secret,
         category: 1,
@@ -287,9 +288,8 @@ app.route.post('/removeUsers', async function(req, cb){
  app.route.post('/getPayedPayslip', async function(req, cb){
      var company = await app.model.Company.findOne({
          condition: {
-             company: req.query.company
-         },
-         fields: ['dappid']
+             dappid: req.query.dappid
+         }
      });
 
      if(!company) return {
@@ -297,7 +297,8 @@ app.route.post('/removeUsers', async function(req, cb){
          isSuccess: false
      }
 
-     var response = await dappCall.call('POST', '/api/dapps/' + company.dappid + '/getPayedPayslip', {pid: req.query.pid});
+     var link = links.centralServer + '/payslip/' + req.query.random + '/' + req.query.dappid + '/' + req.query.hash;
+     var response = await dappCall.call('POST', '/api/dapps/' + req.query.dappid + '/getPayedPayslip', {hash: req.query.hash, link: link, dappid: req.query.dappid});
 
      if(!response) return {
          message: "No response from the dapp",
@@ -308,5 +309,31 @@ app.route.post('/removeUsers', async function(req, cb){
      
  })
 
+ app.route.post('/generatePayslipLink', async function(req, cb){
+     var dappcheck = await app.model.Company.findOne({
+         condition: {
+             dappid: req.query.dappid
+         }
+     });
+     if(!dappcheck) return {
+         message: "Invalid dapp id",
+         isSuccess: false
+     }
+
+     var link = links.centralServer + '/payslip/' + getRandomString() + '/' + req.query.dappid;
+     var response = await dappCall.call('POST', '/api/dapps/' + req.query.dappid + '/generatePayslipLink', {
+         pid: req.query.pid,
+         link: link,
+         days: req.query.days,
+         email: req.query.email
+    });
+
+    if(!response) return {
+        message: "No response from dapp",
+        isSuccess: false
+    }
+
+    return response;
+ })
 
 // dappid:"2b06d8d5f5b1184e4c2813a3e3dafe389287012ebc7f690e7d26863ad6ed95be"
