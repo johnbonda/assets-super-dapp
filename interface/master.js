@@ -55,30 +55,45 @@ return response;
 });
 
 app.route.post('/user/dappid',async function(req,cb){
-        var result = await app.model.Mapping.findOne({
-            condition: {
-                email:req.query.email
-            },
-            fields: ['dappid', 'role']
+
+    var newuser = await app.model.Newuser.exists({
+        email: req.query.email
+    });
+    if(newuser) return {
+        role: "new user"
+    }
+    var total = await app.model.Mapping.count({
+        email: req.query.email
+    })
+
+    if(!total){
+        app.sdb.create('newuser', {
+            email: req.query.email
         });
-        if(!result){
-            var result={
-                email: req.query.email,
-                dappid:"-",
-                role:"new user"
-            }
-            app.sdb.create('mapping', result);
-            return result;
-        }
+        return {
+            role: "new user"
+        };
+    }
+
+    var result = await app.model.Mapping.findAll({
+        condition: {
+            email:req.query.email
+        },
+        limit: req.query.limit,
+        offset: req.query.offset
+    });
+    
+
+    for(i in result){
         var company = await app.model.Company.findOne({
-            condition: { 
-                dappid: result.dappid
+            condition: {
+                dappid: result[i].dappid
             }
         });
-        for(i in company){
-            result[i] = company[i];
-        }
-        return result;
+        result[i] = Object.assign(result[i], company);
+    }
+    return result;
+    
 });
 app.route.post('/user/wallet',async function(req,cb){
     var token=req.query.token
@@ -128,9 +143,3 @@ var response=await app.model.Company.findOne({condition:{dappid:res.dappid},fiel
 });
 return response;
 });
-
-
-
-
-
-

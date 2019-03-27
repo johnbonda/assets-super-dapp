@@ -22,9 +22,9 @@ module.exports = {
             length: 255,
         },
         {
-            name: 'timestampp',
+            name: 'assetType',
             type: 'String',
-            length: 255
+            length:255
         }
     ]
 }

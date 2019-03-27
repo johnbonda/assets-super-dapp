@@ -1,5 +1,6 @@
 var dappCall = require('../utils/dappCall');
 var links = require('../utils/constants').links;
+var blockWait = require('../utils/blockwait');
 
 app.route.post('/findDappsByAddress', async function(req, cb){
     var address = req.query.address;
@@ -16,12 +17,15 @@ app.route.post('/mapAddress', async function(req, cb){
     var dappid = req.query.dappid;
     var check = await app.model.Issueaddr.exists({
         address: address,
-        dappid: dappid
+        dappid: dappid,
+        deleted: '0'
     });
     if(check) return 0;
     app.sdb.create('issueaddr', {
         address: address,
-        dappid: dappid
+        dappid: dappid,
+        timestampp: new Date().getTime(),
+        deleted: '0'
     });
     return 1;
 })
@@ -41,80 +45,37 @@ app.route.post('/user/getDappsByAddress', async function(req, cb){
             }
         });
         result[i].company = company.company;
+        result[i].assetType = company.assetType;
     }
     return result;
 });
 
 app.route.post('/mapUser', async function(req, cb){
-    var options = {
-        email: req.query.email,
-        dappid: req.query.dappid,
-        role: req.query.role
+    var mapping = await app.model.Mapping.findOne({
+        condition: {
+            email: req.query.email,
+            dappid: req.query.dappid,
+            role: req.query.role
+        }
+    });
+    if(mapping) return {
+        isSuccess: false,
+        message: "Email already registered in the dapp with the same role"
     }
-    
-    var check = await app.model.Mapping.exists({
+    var timestampp = new Date().getTime();
+    app.sdb.del('newuser', {
         email: req.query.email
     });
-    if(check) return {
-        message: "Email already Registered with Payroll",
-        isSuccess: false
-    }
-    
-    app.logger.log("About to create a mapping with options: " + JSON.stringify(options));
-    app.sdb.create('mapping', options);
+    app.sdb.create('mapping', {
+        email: req.query.email,
+        dappid: req.query.dappid,
+        role: req.query.role,
+        timestampp: timestampp
+    });
     return {
         isSuccess: true
-    };
+    }
 })
-
-// app.route.post('/dappreg', async function (req, res) {
-
-    
-//     console.log(JSON.stringify(response)); 
-//     if(response && !response.success) {
-//         console.log("failed");
-//       return response;   
-//     }
-//     else if(response.success===true){
-//     console.log("Entering dapp install");
-//     await sleep(5000);
-//     var dappid=response.transaction.id;
-//     console.log(response.transaction.id);
-//     var install_params={
-//             id:dappid,
-//             master:"ytfACAMegjrK"
-//     }
-
-//     var response1 = await dappCall.call('POST', `/api/dapps/install`, install_params);
-//     console.log(JSON.stringify(response1));
-//     if(response1 && !response1.success) {
-//       return response1;        
-//     }
-//     else{
-//         console.log("Entering Dapp launch");
-//         await sleep(5000);
-//         var response2 = await dappCall.call('POST', `/api/dapps/launch`, install_params);
-//       console.log(JSON.stringify(response2)); 
-//     if(response2 && !response2.success) {
-//         return response2;   
-//     }
-//     else{
-//         var email=req.query.email;
-//             app.sdb.create('mapping', {
-//                 email:email,
-//                 role:"superuser"
-//             });
-//         console.log("registered");
-//         var result={
-//             dappid:dappid,
-//             response:"registered"
-//         }
-//     return result;
-//     }
-// }
-//     }
-   
-// });
 
 function getRandomString() {
     var text = "";
@@ -136,6 +97,7 @@ module.exports.registerDapp = async function (req, res) {
     randomText += ".zip";
     
     var link = "http://52.201.227.220:8080/sendzip/" + randomText;
+    if(req.query.assetType) link = "http://52.201.227.220:8080/sendzip2/" + randomText;
     var dapp_params = {
         secret: req.query.secret,
         category: 1,
@@ -164,20 +126,25 @@ module.exports.registerDapp = async function (req, res) {
     var name=req.query.name;
     var country=req.query.country;
     var  dappid=response.transaction.id;
-    // app.sdb.create('mapping', {
-    //     email:email,
-    //     dappid:dappid,
-    //     role:"superuser"
-    // });
-    app.sdb.update('mapping', {dappid: dappid}, {email: email});
-    app.sdb.update('mapping', {role: 'superuser'}, {email: email});
+    var timestampp = new Date().getTime();
+
+    app.sdb.create('mapping', {
+        email: email,
+        dappid: dappid,
+        role: 'superuser',
+        timestampp: timestampp
+    })
+    app.sdb.del('newuser', {
+        email: email
+    });
     app.sdb.create('company',{
         dappid:dappid,
         company:company,
         country:country,
         name:name,
-        timestampp: new Date().getTime().toString()
+        assetType: req.query.assetType || "payslip"
     });
+    response.isSuccess = true;
     return response;
 }
 
@@ -234,13 +201,20 @@ app.route.post('/makeDapp', async function(req, cb){
         }
     }
     do{
-        await sleep(2000);
+        await blockWait();
         console.log("Install Attempt: " + ++count);
         var dappInstallResult = await module.exports.installDapp(installreq, 0);
+        if(!dappInstallResult) return {
+            isSuccess: false,
+            message: "Please try installing DApp again",
+            dappid: installreq.query.id,
+            failedAt: "install"
+        }
         if(count > 15) return {
             isSuccess: false,
             message: "Failed at Installation with error: " + JSON.stringify(dappInstallResult),
-            dappid: installreq.query.id
+            dappid: installreq.query.id,
+            failedAt: "install"
         }
     }while(!dappInstallResult.success);
 
@@ -248,13 +222,20 @@ app.route.post('/makeDapp', async function(req, cb){
     count = 0;
 
     do{
-        await sleep(2000);
+        await sleep(5000);
         console.log("Launch Attempt: " + ++count);
         var dappLaunchResult = await module.exports.launchDapp(installreq, 0);
+        if(!dappLaunchResult) return {
+            isSuccess: false,
+            message: "Please try launching DApp again",
+            dappid: installreq.query.id,
+            failedAt: "launch"
+        }
         if(count > 15) return {
             isSuccess: false,
             message: "Failed at Launch with error: " + JSON.stringify(dappInstallResult),
-            dappid: installreq.query.id
+            dappid: installreq.query.id,
+            failedAt: "launch"
         }
     }while(!dappLaunchResult.success);
     console.log("Finished Dapp launch");
@@ -335,5 +316,3 @@ app.route.post('/removeUsers', async function(req, cb){
 
     return response;
  })
-
-// dappid:"2b06d8d5f5b1184e4c2813a3e3dafe389287012ebc7f690e7d26863ad6ed95be"
