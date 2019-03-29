@@ -25,6 +25,16 @@ module.exports = {
             name: 'assetType',
             type: 'String',
             length:255
+        },
+        {
+            name: 'dappOwner',
+            type: 'String',
+            length: 255,
+        },
+        {
+            name: 'timestampp',
+            type: 'Number',
+            length:255
         }
     ]
 }

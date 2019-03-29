@@ -142,7 +142,9 @@ module.exports.registerDapp = async function (req, res) {
         company:company,
         country:country,
         name:name,
-        assetType: req.query.assetType || "payslip"
+        assetType: req.query.assetType || "payslip",
+        dappOwner: response.transaction.senderId,
+        timestampp: timestampp
     });
     response.isSuccess = true;
     return response;
@@ -201,9 +203,11 @@ app.route.post('/makeDapp', async function(req, cb){
         }
     }
     do{
-        await blockWait();
+        await sleep(2000);
         console.log("Install Attempt: " + ++count);
+        console.log("Installing with: " + JSON.stringify(installreq));
         var dappInstallResult = await module.exports.installDapp(installreq, 0);
+        console.log("Installation Result: " + JSON.stringify(dappInstallResult));
         if(!dappInstallResult) return {
             isSuccess: false,
             message: "Please try installing DApp again",
@@ -222,7 +226,7 @@ app.route.post('/makeDapp', async function(req, cb){
     count = 0;
 
     do{
-        await sleep(5000);
+        await sleep(2000);
         console.log("Launch Attempt: " + ++count);
         var dappLaunchResult = await module.exports.launchDapp(installreq, 0);
         if(!dappLaunchResult) return {
