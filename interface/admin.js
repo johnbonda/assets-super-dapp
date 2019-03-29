@@ -98,13 +98,15 @@ app.route.post("/admin/api2", async function(req){
         });
     }); 
 
+    dappsRegistered = dappsRegistered.result;
+
     for(i in dappsRegistered){
         var totalIssued = await dappCall.call('POST', '/api/dapps/' + dappsRegistered[i].dappid + '/totalCertsIssued', {});
         if(!totalIssued.isSuccess){
             dappsRegistered[i].totalCertificatesIssued = "Dapp Offline";
             continue;
         } 
-        dappsRegistered[i].totalCertificatesIssued = totalIssued;
+        dappsRegistered[i].totalCertificatesIssued = totalIssued.totalCertificates;
     }
     return {
         isSuccess: true,
@@ -114,7 +116,7 @@ app.route.post("/admin/api2", async function(req){
 
 app.route.post("/admin/api3", async function(req){
     var assetTypes = await new Promise((resolve)=>{
-        let sql = `select companys.assetType, count(*) from companys group by companys.assetType order by companys.assetType asc;`;
+        let sql = `select companys.assetType, count(*) as count from companys group by companys.assetType order by companys.assetType asc;`;
         app.sideChainDatabase.all(sql, [], (err, row)=>{
             if(err) resolve({
                 isSuccess: false,
@@ -128,10 +130,12 @@ app.route.post("/admin/api3", async function(req){
         });
     }); 
 
+    assetTypes = assetTypes.result;
+
     for(i in assetTypes){
         var dapps = await app.model.Company.findAll({
             condition: {
-                assetType: assetTypes[i]
+                assetType: assetTypes[i].assetType
             },
             fields: ['dappid']
         });
@@ -174,7 +178,11 @@ app.route.post("/admin/api4", async function(req){
         });
     }); 
     var yesterdayCount = await new Promise((resolve)=>{
-        app.sideChainDatabase.get(sql, [(new Date(first.getTime()).setDate(first.getDate()-1)).getTime() ,(new Date(last.getTime()).setDate(first.getDate()-1)).getTime()], (err, row)=>{
+        let one = new Date(first.getTime());
+        one.setDate(first.getDate()-1);
+        var two = new Date(last.getTime());
+        two.setDate(first.getDate()-1);
+        app.sideChainDatabase.get(sql, [one.getTime() ,two.getTime()], (err, row)=>{
             if(err) resolve({
                 isSuccess: false,
                 message: JSON.stringify(err),
@@ -187,8 +195,9 @@ app.route.post("/admin/api4", async function(req){
         });
     }); 
     var lastWeekCount = await new Promise((resolve)=>{
-        let sql = `select count(*) as count from (select companys.dappid from companys where companys.timestampp between ? and ?);`;
-        app.sideChainDatabase.get(sql, [(new Date(first.getTime()).setDate(first.getDate()-7)).getTime() ,last.getTime()], (err, row)=>{ 
+        let one = new Date(first.getTime());
+        one.setDate(first.getDate()-7);
+        app.sideChainDatabase.get(sql, [one.getTime() ,last.getTime()], (err, row)=>{ 
             if(err) resolve({
                 isSuccess: false,
                 message: JSON.stringify(err),
@@ -201,8 +210,9 @@ app.route.post("/admin/api4", async function(req){
         });
     }); 
     var lastMonthCount = await new Promise((resolve)=>{
-        let sql = `select count(*) as count from (select companys.dappid from companys where companys.timestampp between ? and ?);`;
-        app.sideChainDatabase.get(sql, [(new Date(first.getTime()).setMonth(first.getMonth()-1)).getTime() ,last.getTime()], (err, row)=>{ 
+        let one = new Date(first.getTime());
+        one.setMonth(first.getMonth()-1);
+        app.sideChainDatabase.get(sql, [one.getTime() ,last.getTime()], (err, row)=>{ 
             if(err) resolve({
                 isSuccess: false,
                 message: JSON.stringify(err),
@@ -217,16 +227,16 @@ app.route.post("/admin/api4", async function(req){
 
     return {
         isSuccess: true,
-        todayCount: todayCount,
-        yesterdayCount: yesterdayCount,
-        lastWeekCount: lastWeekCount,
-        lastMonthCount: lastMonthCount
+        todayCount: todayCount.result.count,
+        yesterdayCount: yesterdayCount.result.count,
+        lastWeekCount: lastWeekCount.result.count,
+        lastMonthCount: lastMonthCount.result.count
     }
 });
 
 app.route.post("/admin/api5", async function(req){
     var assetTypes = await new Promise((resolve)=>{
-        let sql = `select companys.assetType, count(*) from companys group by companys.assetType order by companys.assetType asc;`;
+        let sql = `select companys.assetType, count(*) as count from companys group by companys.assetType order by companys.assetType asc;`;
         app.sideChainDatabase.all(sql, [], (err, row)=>{
             if(err) resolve({
                 isSuccess: false,
@@ -240,10 +250,12 @@ app.route.post("/admin/api5", async function(req){
         });
     }); 
 
+    assetTypes = assetTypes.result
+
     for(i in assetTypes){
         var dapps = await app.model.Company.findAll({
             condition: {
-                assetType: assetTypes[i]
+                assetType: assetTypes[i].assetType
             },
             fields: ['dappid']
         });
@@ -261,7 +273,7 @@ app.route.post("/admin/api5", async function(req){
         }
         assetTypes[i].totalCertificatesIssued = sum;
         assetTypes[i].totalInUse = dapps.length - offline;
-        assetTypes[i].sumOfRegistered = sumOfRegistered;
+        assetTypes[i].totalRecepients = sumOfRegistered;
     }
     return {
         isSuccess: true,
@@ -288,6 +300,7 @@ app.route.post("/admin/api6", async function(req){
             });
         });
     });
+    dapps = dapps.result;
     for(i in dapps){
         var details = await dappCall.call('POST', '/api/dapps/' + dapps[i].dappid + '/admin/workDetails', {});
         if(!details.isSuccess) {
@@ -295,7 +308,7 @@ app.route.post("/admin/api6", async function(req){
             continue;
         }
         dapps[i].issuersCount = details.issuersCount;
-        dapps[i].authorizersCount = details.authorizerCount;
+        dapps[i].authorizersCount = details.authorizersCount;
         dapps[i].recepientsCount = details.recepientsCount;
         dapps[i].issuesCount = details.issuesCount;
     }
