@@ -72,8 +72,12 @@ app.route.post("/admin/api1", async function(req){
     })
     var sum = 0;
     for(i in allDapps){
+        try{
         var totalIssued = await dappCall.call('POST', '/api/dapps/' + allDapps[i].dappid + '/totalCertsIssued', {});
-        if(!totalIssued.isSuccess) continue;
+        } catch (err){
+            continue;
+        }
+        if(!totalIssued || !totalIssued.isSuccess) continue;
         sum += totalIssued.totalCertificates;
     }
     return {
@@ -103,8 +107,13 @@ app.route.post("/admin/api2", async function(req){
     dappsRegistered = dappsRegistered.result;
 
     for(i in dappsRegistered){
+        try{
         var totalIssued = await dappCall.call('POST', '/api/dapps/' + dappsRegistered[i].dappid + '/totalCertsIssued', {});
-        if(!totalIssued.isSuccess){
+        }catch(err){
+            dappsRegistered[i].totalCertificatesIssued = "Dapp Offline";
+            continue;
+        }
+        if(!totalIssued || !totalIssued.isSuccess){
             dappsRegistered[i].totalCertificatesIssued = "Dapp Offline";
             continue;
         } 
@@ -143,8 +152,12 @@ app.route.post("/admin/api3", async function(req){
         });
         var sum = 0;
         for(j in dapps){
+            try{
             var totalIssued = await dappCall.call('POST', '/api/dapps/' + dapps[j].dappid + '/totalCertsIssued', {});
-            if(!totalIssued.isSuccess) continue;
+            }catch(err){
+                continue;
+            }
+            if(!totalIssued || !totalIssued.isSuccess) continue;
             sum += totalIssued.totalCertificates;
         }
         assetTypes[i].totalCertificatesIssued = sum;
@@ -265,8 +278,13 @@ app.route.post("/admin/api5", async function(req){
         var offline = 0;
         var sumOfRegistered = 0;
         for(j in dapps){
+            try{
             var totalIssued = await dappCall.call('POST', '/api/dapps/' + dapps[j].dappid + '/admin/workDetails', {});
-            if(!totalIssued.isSuccess){
+            }catch(err){
+                offline++;
+                continue;
+            }
+            if(!totalIssued || !totalIssued.isSuccess){
                 offline++;
                 continue;
             }
@@ -304,8 +322,13 @@ app.route.post("/admin/api6", async function(req){
     });
     dapps = dapps.result;
     for(i in dapps){
+        try{
         var details = await dappCall.call('POST', '/api/dapps/' + dapps[i].dappid + '/admin/workDetails', {});
-        if(!details.isSuccess) {
+        }catch(err){
+            dapps[i].offline = true;
+            continue;
+        }
+        if(!details || !details.isSuccess) {
             dapps[i].offline = true;
             continue;
         }
