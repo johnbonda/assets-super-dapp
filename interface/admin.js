@@ -1,4 +1,6 @@
 var dappCall = require('../utils/dappCall');
+var util = require('../utils/util');
+var blockWait = require('../utils/blockwait')
 
 
 app.route.post('/getCompanies', async function(req, cb){
@@ -315,5 +317,344 @@ app.route.post("/admin/api6", async function(req){
     return {
         isSuccess: true,
         dapps: dapps
+    }
+});
+
+app.route.post('/setPaymentRules', async function(req){
+    if(!req.query.paymentMode || !req.query.paymentGateway) return {
+        isSuccess: false,
+        message: "Please provide paymenMode and paymentGateway values"
+    }
+    var create = {
+        paymentMode: req.query.paymentMode,
+        paymentGateway: req.query.paymentGateway,
+        deleted: '0'
+    }
+    var error = {
+        isSuccess: false,
+        message: "Same rule already exists"
+    }
+    if(req.query.assetType){
+        create.assetType=req.query.assetType;
+        create.country = req.query.country || '-';
+
+        let exists = await app.model.Apm.exists(create);
+        if(exists) return  error;
+
+        app.sdb.create('apm', create);
+    } else if(req.query.country){
+        create.country = req.query.country;
+        
+        let exists = await app.model.Cpm.exists(create);
+        if(exists) return error;
+
+        app.sdb.create('cpm', create);
+    } else if (req.query.dappid){
+        create.dappid = req.query.dappid;
+
+        let exists = await app.model.Dpm.exists(create);
+        if(exists) return error;
+
+        app.sdb.create('dpm', create);
+    } else return {
+        isSuccess: false,
+        message: "Need to specify dappid or assetType or country to set rule"
+    }
+    return {
+        isSuccess: true
+    }
+})
+
+app.route.post('/getPaymentRule', async function(req){
+    var dapp = await app.model.Company.findOne({
+        condition: {
+            name: req.query.name
+        }
+    });
+    if(!dapp) return {
+        isSuccess: false,
+        message: "Dapp not found"
+    }
+
+    function setValues(obj){
+        return {
+            isSuccess: true,
+            paymentMode: obj.paymentMode,
+            paymentGateway: obj.paymentGateway
+        }
+    }
+
+    var dpm = await app.model.Dpm.findOne({
+        condition: {
+            dappid: dapp.dappid,
+            deleted: '0'
+        }
+    });
+    if(dpm) return setValues(dpm);
+
+    var apmc = await app.model.Apm.findOne({
+        condition: {
+            assetType: dapp.assetType,
+            country:  dapp.country
+        }
+    });
+    if(apmc) return setValues(apmc);
+
+    var apm = await app.model.Apm.findOne({
+        condition: {
+            assetType: dapp.assetType
+        }
+    })
+    if(apm) return setValues(apm);
+
+    var cpm = await app.model.Cpm.findOne({
+        condition: {
+            country: dapp.country
+        }
+    })
+    if(cpm) return setValues(cpm);
+
+    return {
+        isSuccess: false,
+        message: "No payment rule defined"
+    }
+})
+
+app.route.post("/setTransactionRule", async function(req) {
+    if(!req.query.transactionType || !req.query.transactionFee) return {
+        isSuccess: false,
+        message: "Please provide transactionType and transactionFee values"
+    }
+    var create = {
+        transactionType: req.query.transactionType,
+        transactionFee: req.query.transactionFee,
+        deleted: '0'
+    }
+    var error = {
+        isSuccess: false,
+        message: "Same rule already exists"
+    }
+    if(req.query.assetType){
+        create.assetType=req.query.assetType;
+        create.country = req.query.country || '-';
+
+        let exists = await app.model.Atm.exists(create);
+        if(exists) return  error;
+
+        app.sdb.create('atm', create);
+    } else if(req.query.country){
+        create.country = req.query.country;
+        
+        let exists = await app.model.Ctm.exists(create);
+        if(exists) return error;
+
+        app.sdb.create('ctm', create);
+    } else if (req.query.dappid){
+        create.dappid = req.query.dappid;
+
+        let exists = await app.model.Dtm.exists(create);
+        if(exists) return error;
+
+        app.sdb.create('dtm', create);
+    } else return {
+        isSuccess: false,
+        message: "Need to specify dappid or assetType or country to set rule"
+    }
+    return {
+        isSuccess: true
+    }
+})
+
+app.route.post("/getTransactionRule", async function(req){
+    var dapp = await app.model.Company.findOne({
+        condition: {
+            name: req.query.name
+        }
+    });
+    if(!dapp) return {
+        isSuccess: false,
+        message: "Dapp not found"
+    }
+
+    function setValues(obj){
+        return {
+            isSuccess: true,
+            transactionType: obj.transactionType,
+            transactionFee: obj.transactionFee
+        }
+    }
+
+    var dpm = await app.model.Dtm.findOne({
+        condition: {
+            dappid: dapp.dappid,
+            deleted: '0'
+        }
+    });
+    if(dpm) return setValues(dpm);
+
+    var apmc = await app.model.Atm.findOne({
+        condition: {
+            assetType: dapp.assetType,
+            country:  dapp.country
+        }
+    });
+    if(apmc) return setValues(apmc);
+
+    var apm = await app.model.Atm.findOne({
+        condition: {
+            assetType: dapp.assetType
+        }
+    })
+    if(apm) return setValues(apm);
+
+    var cpm = await app.model.Ctm.findOne({
+        condition: {
+            country: dapp.country
+        }
+    })
+    if(cpm) return setValues(cpm);
+
+    return {
+        isSuccess: false,
+        message: "No transaction rule defined"
+    }
+})
+
+app.route.post("/admin/add", async function(req){
+    if(!(req.query.name && req.query.role && req.query.email && req.query.password)) return {
+        isSuccess: false,
+        message: "Details missing"
+    }
+    var exists = await app.model.Admin.findOne({
+        condition: {
+            email: req.query.email,
+            deleted: '0'
+        }
+    });
+    if(exists) return {
+        isSuccess: false,
+        message: "Email already registered as an admin with AdminId: " + exists.adminid
+    }
+    var passwordHash = util.getHash(req.query.password);
+    passwordHash = passwordHash.toString('base64');
+    app.sdb.create('admin', {
+        adminid: app.autoID.increment('admins_max_adminid'),
+        name: req.query.name,
+        role: req.query.role,
+        email: req.query.email,
+        passwordHash: passwordHash,
+        // privilegesView: req.query.privilegesView,
+        // privilegesEdit: req.query.privilegesEdit,
+        // privilegesAdd: req.query.privilegesAdd,
+        // privilegesDelete: req.query.privilegesDelete,
+        timestampp: new Date().getTime(),
+        deleted: '0'
+    });
+    await blockWait();
+    return {
+        isSuccess: true
+    }
+});
+
+// app.route.post("/admin/edit", async function(req){
+//     var admin = await app.model.Admin.findOne({
+//         condition: {
+//             adminid: req.query.adminid,
+//             deleted: '0'
+//         }
+//     });
+//     if(!admin) return {
+//         isSuccess: false,
+//         message: "Admin not found"
+//     }
+
+//     app.sdb.update('admin', {
+//         privilegesView: req.query.privilegesView || admin.privilegesView
+//     },{
+//         adminid: req.query.adminid
+//     });
+//     app.sdb.update('admin', {
+//         privilegesEdit: req.query.privilegesEdit || admin.privilegesEdit
+//     },{
+//         adminid: req.query.adminid
+//     });
+//     app.sdb.update('admin', {
+//         privilegesAdd: req.query.privilegesAdd || admin.privilegesAdd
+//     },{
+//         adminid: req.query.adminid
+//     });
+//     app.sdb.update('admin', {
+//         privilegesDelete: req.query.privilegesDelete || admin.privilegesDelete
+//     },{
+//         adminid: req.query.adminid
+//     });
+//     return {
+//         isSuccess: true
+//     }
+// });
+
+app.route.post('/admins', async function(req){
+    var condition = {
+        deleted: '0'
+    }
+    var total = await app.model.Admin.count(condition)
+    var admins = await app.model.Admin.findAll({
+        condition: condition,
+        fields: ['adminid', 'name', 'email', 'timestampp'],
+        limit: req.query.limit,
+        offset: req.query.offset
+    });
+    return {
+        isSuccess: true,
+        total: total,
+        admins: admins
+    }
+});
+
+app.route.post('/admin/search', async function(req){
+    var condition = {};
+    if(req.query.email){
+        condition.email = req.query.email
+    } else if (req.query.name){
+        condition.name = req.query.name
+    } else return {
+        isSuccess: false,
+        message: "Please pass either email or name to search"
+    }
+    var admin = await app.model.Admin.findOne({
+        condition: condition
+    });
+    if(!admin) return {
+        isSuccess: false,
+        message: "No admin found"
+    }
+    delete admin.passwordHash;
+    return {
+        isSuccess: true,
+        admin: admin
+    }
+});
+
+app.route.post('/admin/login', async function(req){
+    if(!(req.query.email && req.query.password)) return {
+        isSuccess: false,
+        message: "Email or password missing"
+    }
+    var passwordHash = util.getHash(req.query.password);
+    passwordHash = passwordHash.toString('base64');
+    var admin = await app.model.Admin.findOne({
+        condition: {
+            email: req.query.email,
+            passwordHash: passwordHash
+        }
+    });
+    if(!admin) return {
+        isSuccess: false,
+        message: "Invalid credentials"
+    }
+    delete admin.passwordHash;
+    return {
+        isSuccess: true,
+        admin: admin
     }
 });
