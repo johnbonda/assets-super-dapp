@@ -9,3 +9,12 @@ app.route.post("/companysTable", async function(req){
         timestampp: new Date().getTime()
     })
 })
+
+app.route.post("/mappingsTable", async function(req){
+    app.sdb.create('mapping', {
+        email: req.query.email,
+        dappid: req.query.dappid,
+        role: req.query.role,
+        timestampp: new Date().getTime()
+    });
+})

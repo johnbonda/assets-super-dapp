@@ -444,13 +444,12 @@ app.route.post('/getPaymentRule', async function(req){
 })
 
 app.route.post("/setTransactionRule", async function(req) {
-    if(!req.query.transactionType || !req.query.transactionFee) return {
+    if(!req.query.serviceFee) return {
         isSuccess: false,
-        message: "Please provide transactionType and transactionFee values"
+        message: "Please provide serviceFee value"
     }
     var create = {
-        transactionType: req.query.transactionType,
-        transactionFee: req.query.transactionFee,
+        serviceFee: req.query.serviceFee,
         deleted: '0'
     }
     var error = {
@@ -502,8 +501,7 @@ app.route.post("/getTransactionRule", async function(req){
     function setValues(obj){
         return {
             isSuccess: true,
-            transactionType: obj.transactionType,
-            transactionFee: obj.transactionFee
+            serviceFee: obj.serviceFee
         }
     }
 
@@ -539,7 +537,7 @@ app.route.post("/getTransactionRule", async function(req){
 
     return {
         isSuccess: false,
-        message: "No transaction rule defined"
+        message: "No service fee rule defined"
     }
 })
 

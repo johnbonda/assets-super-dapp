@@ -12,12 +12,7 @@ module.exports = {
         length: 255
       },
       {
-        name: 'transactionType',
-        type: 'String',
-        length: 255
-      },
-      {
-        name: 'transactionFee',
+        name: 'serviceFee',
         type: 'String',
         length: 255
       },

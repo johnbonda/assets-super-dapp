@@ -1,5 +1,5 @@
 module.exports = {
-    name: 'dtms',
+    name: 'dappsfees',
     fields: [
       {
         name: 'dappid',
@@ -7,7 +7,17 @@ module.exports = {
         length: 255
       },
       {
-        name: 'serviceFee',
+        name: 'contract',
+        type: 'String',
+        length: 255
+      },
+      {
+        name: 'contractName',
+        type: 'String',
+        length: 255
+      },
+      {
+        name: 'transactionFee',
         type: 'String',
         length: 255
       },
