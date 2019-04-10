@@ -252,3 +252,26 @@ app.route.post('/address/assetType/dapps', async function(req){
         dapps: dapps.result
     }
 })
+
+app.route.post('/getlist', async function(req){
+    var dapps = await new Promise((resolve)=>{
+        let sql = `select companys.country, companys.assetType, companys.name as dappName from companys;`;
+        app.sideChainDatabase.all(sql, [], (err, row)=>{
+            if(err) resolve({
+                isSuccess: false,
+                message: JSON.stringify(err),
+                result: {}
+            });
+            resolve({
+                isSuccess: true,
+                result: row
+            });
+        });
+    });
+
+    if(!dapps.isSuccess) return dapps;
+
+    return {
+        dapps: dapps.result
+    }
+})

@@ -51,7 +51,7 @@ app.route.post('/company/data', async function(req, cb){
     }
 });
 
-app.route.post("/admin/api1", async function(req){
+app.route.post("/admin/assetStatistics", async function(req){
     var assetTypes = await new Promise((resolve)=>{
         let sql = `select count(*) as count from (select distinct companys.assetType from companys);`;
         app.sideChainDatabase.get(sql, [], (err, row)=>{
@@ -88,7 +88,7 @@ app.route.post("/admin/api1", async function(req){
     }
 })
 
-app.route.post("/admin/api2", async function(req){
+app.route.post("/admin/recentlyRegisteredDapps", async function(req){
     var dappsRegistered = await new Promise((resolve)=>{
         let sql = `select mappings.email as ownerEmail, companys.* from companys join mappings on mappings.dappid = companys.dappid and role = 'superuser' order by companys.timestampp desc limit ?;`;
         app.sideChainDatabase.all(sql, [req.query.limit || 5], (err, row)=>{
@@ -125,7 +125,7 @@ app.route.post("/admin/api2", async function(req){
     }
 })
 
-app.route.post("/admin/api3", async function(req){
+app.route.post("/admin/assetSpecificDetails", async function(req){
     var assetTypes = await new Promise((resolve)=>{
         let sql = `select companys.assetType, count(*) as count from companys group by companys.assetType order by companys.assetType asc;`;
         app.sideChainDatabase.all(sql, [], (err, row)=>{
@@ -168,7 +168,7 @@ app.route.post("/admin/api3", async function(req){
     }
 })
 
-app.route.post("/admin/api4", async function(req){
+app.route.post("/admin/dappsRegistrationOnTimeLine", async function(req){
     var first = new Date();
     var last = new Date();
     first.setHours(0);
@@ -249,7 +249,7 @@ app.route.post("/admin/api4", async function(req){
     }
 });
 
-app.route.post("/admin/api5", async function(req){
+app.route.post("/admin/assetsOverviewStatistics", async function(req){
     var assetTypes = await new Promise((resolve)=>{
         let sql = `select companys.assetType, count(*) as count from companys group by companys.assetType order by companys.assetType asc;`;
         app.sideChainDatabase.all(sql, [], (err, row)=>{
@@ -301,7 +301,7 @@ app.route.post("/admin/api5", async function(req){
     }
 });
 
-app.route.post("/admin/api6", async function(req){
+app.route.post("/admin/assetSpecificOverviewStatistics", async function(req){
     if(!req.query.assetType) return {
         isSuccess: false,
         message: "Please provide an assetType"
