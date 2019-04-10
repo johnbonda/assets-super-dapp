@@ -20,7 +20,7 @@ module.exports = {
   fixedPoint : Math.pow(10, 10),
   defaultCurrency: 'BEL', // default currency symbole for Belrium
   totalSupply: 2100000000000000000,
-  URL: "http://54.254.174.74:8080",
+  URL: "http://13.58.195.242:8080",
   URC:"http://localhost:9305",
   fees: {
     send: 0.001,
