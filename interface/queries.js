@@ -196,3 +196,59 @@ app.route.post('/user/assetType/dapps', async function(req) {
         dapps: dappArray
     }
 })
+
+app.route.post('/address/assetType/dapps', async function(req){
+    var condition = `select issueaddrs.dappid, companys.company, companys.name as dappName, companys.assetType from issueaddrs join companys on companys.dappid = issueaddrs.dappid where issueaddrs.deleted = '0'`;
+    if(!(req.query.address || req.query.assetType)) return {
+        isSuccess: false,
+        message: "Please provide address or assetType or both"
+    }
+    var input = [];
+    if(req.query.address){
+        condition += ` and issueaddrs.address = ?`;
+        input.push(req.query.address);
+    }
+    if(req.query.assetType){
+        condition += ` and companys.assetType = ?`;
+        input.push(req.query.assetType);
+    }
+
+    var total = await new Promise((resolve)=>{
+        let sql = `select count(*) as count from (${condition});`;
+        app.sideChainDatabase.get(sql, input, (err, row)=>{
+            if(err) resolve({
+                isSuccess: false,
+                message: JSON.stringify(err),
+                result: {}
+            });
+            resolve({
+                isSuccess: true,
+                result: row
+            });
+        });
+    });
+
+    input.push(req.query.limit || 20, req.query.offset || 0);
+
+    var dapps = await new Promise((resolve)=>{
+        let sql = `${condition} order by issueaddrs.timestampp desc limit ? offset ?;`;
+        app.sideChainDatabase.all(sql, input, (err, row)=>{
+            if(err) resolve({
+                isSuccess: false,
+                message: JSON.stringify(err),
+                result: {}
+            });
+            resolve({
+                isSuccess: true,
+                result: row
+            });
+        });
+    });
+
+    if(!dapps.isSuccess) return dapps;
+
+    return {
+        total: total.result.count,
+        dapps: dapps.result
+    }
+})
