@@ -1,7 +1,10 @@
 var SwaggerCall = require('../utils/SwaggerCall.js');
 var hlCall=require('../utils/hlCall.js');
 var headerCall=require('../utils/headerCall.js');
-
+var addressUtils = require('../utils/address');
+var utils = require('../utils/util');
+var blockWait = require('../utils/blockwait');
+var dappCall = require('../utils/dappCall')
 
 app.route.post('/user/exists',async function(req,cb){
   if(req.query.email===undefined) return "invalid input";
@@ -143,3 +146,30 @@ var response=await app.model.Company.findOne({condition:{dappid:res.dappid},fiel
 });
 return response;
 });
+
+app.route.post("/dapp/updateDappBalance", async function(req){
+    var response = await dappCall.call('PUT', `/api/dapps/transaction`, req.query);
+    if(!response.success) return {
+        isSuccess: false,
+        message: response.error
+    }
+
+    var address = addressUtils.generateBase58CheckAddress(utils.getPublicKey(req.query.secret));
+    console.log("The address generated is: " + address);
+
+    app.sdb.create('recharge', {
+        transactionId: response.transactionId,
+        dappid: req.query.dappId,
+        address: address,
+        amount: req.query.amount,
+        email: req.query.email,
+        timestampp: new Date().getTime()
+    });
+
+    await blockWait();
+
+    return {
+        isSuccess: true,
+        transactionId: response.transactionId
+    }
+})

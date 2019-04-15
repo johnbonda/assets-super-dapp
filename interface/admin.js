@@ -635,21 +635,22 @@ app.route.post('/admins', async function(req){
 app.route.post('/admin/search', async function(req){
     var condition = {};
     if(req.query.email){
-        condition.email = req.query.email
+        condition.email = {
+            $like: "%" + req.query.email + "%"
+        }
     } else if (req.query.name){
-        condition.name = req.query.name
+        condition.name = {
+            $like: "%" + req.query.name + "%"
+        }
     } else return {
         isSuccess: false,
         message: "Please pass either email or name to search"
     }
-    var admin = await app.model.Admin.findOne({
-        condition: condition
+    condition.deleted = '0';
+    var admin = await app.model.Admin.findAll({
+        condition: condition,
+        fields: ['adminid', 'name', 'role', 'email', 'timestampp']
     });
-    if(!admin) return {
-        isSuccess: false,
-        message: "No admin found"
-    }
-    delete admin.passwordHash;
     return {
         isSuccess: true,
         admin: admin
@@ -679,3 +680,17 @@ app.route.post('/admin/login', async function(req){
         admin: admin
     }
 });
+
+app.route.post('/admin/geDappNamesIds', async function(req){
+    var dappids = await app.model.Company.findAll({
+        fields: ['dappid', 'name']
+    });
+    var result = {}
+    for(i in dappids){
+        result[dappids[i].name] = dappids[i].dappid
+    }
+    return {
+        isSuccess: true,
+        dapps: result
+    }
+})

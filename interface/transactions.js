@@ -34,7 +34,8 @@ app.route.post('/dapps/getTransactionFees', async function(req){
     var company = await app.model.Company.findOne({
         condition: {
             dappid: req.query.dappid
-        }
+        },
+        fields: ['dappOwner']
     });
     if(!company) return {
         isSuccess: false,
@@ -57,7 +58,8 @@ app.route.post('/dapps/getTransactionFees', async function(req){
 
     return {
         isSuccess: true,
-        fee: fee
+        fee: fee,
+        dappOwner: company.dappOwner
     }
 })
 

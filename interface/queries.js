@@ -275,3 +275,40 @@ app.route.post('/getlist', async function(req){
         dapps: dapps.result
     }
 })
+
+app.route.post("/recentlyRechargedDapps", async function(req){
+    var dapps = await new Promise((resolve)=>{
+        let sql = `select mappings.email, companys.name, companys.dappid, recharges.address, recharges.timestampp from recharges join mappings on recharges.dappid = mappings.dappid join companys on recharges.dappid = companys.dappid order by recharges.timestampp desc limit ?;`;
+        app.sideChainDatabase.all(sql, [req.query.limit || 5], (err, row)=>{
+            if(err) resolve({
+                isSuccess: false,
+                message: JSON.stringify(err),
+                result: {}
+            });
+            resolve({
+                isSuccess: true,
+                result: row
+            });
+        });
+    });
+
+    if(!dapps.isSuccess) return dapps;
+
+    for(i in dapps.result){
+        try{
+        var response = await dappCall.call('GET', '/api/dapps/' + dapps.result[i].dappid + '/rechargeDetails', {});
+        }catch(err) {
+            console.log(JSON.stringify(err));
+        }
+        if(!(response && response.success)) {
+            dapps.result[i].dappBalance = '-';
+            dapps.result[i].issuedCount = '-';
+            continue;
+        }
+        dapps.result[i].dappBalance = response.superUserBalance;
+        dapps.result[i].issuedCount = response.issuedCount;
+    }
+    return {
+        dapps: dapps.result
+    }
+})
