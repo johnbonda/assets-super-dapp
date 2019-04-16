@@ -316,3 +316,69 @@ app.route.post("/recentlyRechargedDapps", async function(req){
         dapps: dapps.result
     }
 })
+
+app.route.post('/campaignApi1', async function(req){
+    var total = await new Promise((resolve)=>{
+        let sql = `select count(*) as count from companys;`;
+        app.sideChainDatabase.get(sql, [], (err, row)=>{
+            if(err) resolve({
+                isSuccess: false,
+                message: JSON.stringify(err),
+                result: {}
+            });
+            resolve({
+                isSuccess: true,
+                result: row
+            });
+        });
+    });
+
+    var assets = await new Promise((resolve)=>{
+        let sql = `select companys.assetType, count(*) as countofDapps from companys group by companys.assetType;`;
+        app.sideChainDatabase.all(sql, [], (err, row)=>{
+            if(err) resolve({
+                isSuccess: false,
+                message: JSON.stringify(err),
+                result: {}
+            });
+            resolve({
+                isSuccess: true,
+                result: row
+            });
+        });
+    });
+
+    return {
+        isSuccess: true,
+        dappsCount: total.result.count,
+        assets: assets.result
+    }
+});
+
+app.route.post('/campaignApi2', async function(req){
+    var count = await app.model.Mapping.count({
+        email: req.query.email,
+        role: 'superuser'
+    });
+    return {
+        isSuccess: true,
+        count: count
+    }
+});
+
+app.route.post('/campaignApi3', async function(req){
+    var newUser = await app.model.Newuser.findOne({
+        condition: {
+            email: req.query.email
+        }
+    });
+    if(!newUser) return {
+        isSuccess: false,
+        message: "Not a new user"
+    }
+    var timestampp = new Date().getTime();
+    return {
+        isSuccess: true,
+        time: timestampp - newUser.timestampp
+    }
+});
