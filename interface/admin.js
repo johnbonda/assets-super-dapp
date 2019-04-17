@@ -577,6 +577,30 @@ app.route.post("/admin/add", async function(req){
     }
 });
 
+app.route.post("/admin/delete", async function(req){
+    if(!req.query.adminid) return {
+        isSuccess: false,
+        message: "Please provide an AdminId"
+    }
+    var exists = await app.model.Admin.exists({
+        adminid: req.query.adminid,
+        deleted: '0'
+    });
+    if(!exists) return {
+        isSuccess: false,
+        message: "Admin does not exist"
+    }
+    app.sdb.update('admin', {
+        deleted: '1'
+    },{
+        adminid: req.query.adminid
+    });
+    await blockWait();
+    return {
+        isSuccess: true
+    }
+})
+
 // app.route.post("/admin/edit", async function(req){
 //     var admin = await app.model.Admin.findOne({
 //         condition: {
@@ -667,7 +691,8 @@ app.route.post('/admin/login', async function(req){
     var admin = await app.model.Admin.findOne({
         condition: {
             email: req.query.email,
-            passwordHash: passwordHash
+            passwordHash: passwordHash,
+            deleted: '0'
         }
     });
     if(!admin) return {
