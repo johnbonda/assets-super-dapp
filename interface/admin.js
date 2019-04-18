@@ -645,7 +645,7 @@ app.route.post('/admins', async function(req){
     var total = await app.model.Admin.count(condition)
     var admins = await app.model.Admin.findAll({
         condition: condition,
-        fields: ['adminid', 'name', 'email', 'timestampp'],
+        fields: ['adminid', 'name', 'email', 'timestampp', 'role'],
         limit: req.query.limit,
         offset: req.query.offset
     });

@@ -201,6 +201,30 @@ app.route.post('/user/assetType/dapps', async function(req) {
     }
 })
 
+app.route.post('/user/assetTypes', async function(req){
+    var dapps = await new Promise((resolve)=>{
+        let sql = `select distinct companys.assetType from issueaddrs join companys on companys.dappid = issueaddrs.dappid where issueaddrs.address = ? order by issueaddrs.timestampp desc;`;
+        app.sideChainDatabase.all(sql, [req.query.address], (err, row)=>{
+            if(err) resolve({
+                isSuccess: false,
+                message: JSON.stringify(err),
+                result: {}
+            });
+            resolve({
+                isSuccess: true,
+                result: row
+            });
+        });
+    });
+
+    if(!dapps.isSuccess) return dapps;
+
+    return {
+        isSuccess: true,
+        assetTypes: dapps.result
+    }
+});
+
 app.route.post('/address/assetType/dapps', async function(req){
     var condition = `select issueaddrs.dappid, companys.company, companys.name as dappName, companys.assetType from issueaddrs join companys on companys.dappid = issueaddrs.dappid where issueaddrs.deleted = '0'`;
     if(!(req.query.address || req.query.assetType)) return {
