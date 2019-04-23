@@ -406,9 +406,21 @@ app.route.post('/removeUsers', async function(req, cb){
      var condition = {
          deleted: '0'
      }
-     var dtms = await app.model.Dtm.findAll({
-         condition: condition
-     });
+     var dtms = await new Promise((resolve)=>{
+        let sql = `select companys.name, companys.assetType, companys.country, dtms.* from dtms join companys on companys.dappid = dtms.dappid where dtms.deleted = '0';`;
+        app.sideChainDatabase.all(sql, [], (err, row)=>{
+            if(err) resolve({
+                isSuccess: false,
+                message: JSON.stringify(err),
+                result: {}
+            });
+            resolve({
+                isSuccess: true,
+                result: row
+            });
+        });
+    });
+    if(!dtms.isSuccess) return dtms;
      var atms = await app.model.Atm.findAll({
          condition: condition
      });
@@ -417,7 +429,7 @@ app.route.post('/removeUsers', async function(req, cb){
      });
      return {
          isSuccess: true,
-         dappsFees: dtms,
+         dappsFees: dtms.result,
          assetTypeFees: atms,
          countryFees: ctms
      }
