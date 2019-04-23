@@ -1,6 +1,9 @@
 var dappCall = require('../utils/dappCall');
 var links = require('../utils/constants').links;
 var blockWait = require('../utils/blockwait');
+var util = require("../utils/util");
+var addressUtils = require('../utils/address');
+var getCharge = require('./admin').getCharge;
 
 app.route.post('/findDappsByAddress', async function(req, cb){
     var address = req.query.address;
@@ -319,4 +322,74 @@ app.route.post('/removeUsers', async function(req, cb){
     }
 
     return response;
- })
+ });
+
+ app.route.post('/setVerificationFee', async function(req){
+     if(!(req.query.fee && req.query.dappid && req.query.secret)) return {
+         isSuccess: false,
+         message: "Arguments missing"
+     }
+     var ownerAddress = addressUtils.generateBase58CheckAddress(util.getPublicKey(req.query.secret));
+
+     var authCheck = await app.model.Company.exists({
+         dappid: req.query.dappid,
+         dappOwner: ownerAddress
+     });
+     if(!authCheck) return {
+         isSuccess: false,
+         message: "Wrong DApp owner"
+     }
+
+     var verificationFee = await app.model.Verificationfee.findOne({
+         condition: {
+             dappid: req.query.dappid
+         }
+     });
+     if(verificationFee){
+         app.sdb.update('verificationfee', {
+             fee: req.query.fee
+         }, {
+             dappid: req.query.dappid
+         });
+     } else{
+         app.sdb.create('verificationfee', {
+             dappid: req.query.dappid,
+             fee: req.query.fee
+         });
+     }
+
+     await blockWait();
+
+     return {
+         isSuccess: true
+     }
+ });
+
+ app.route.post('/getVerificationFee', async function(req){
+    var dapp = await app.model.Company.findOne({
+        condition: {
+            dappid: req.query.dappid
+        }
+    });
+    if(!dapp) return {
+        isSuccess: false,
+        message: "Invalid Dappid"
+    }
+     var verificationFee = await app.model.Verificationfee.findOne({
+         condition: {
+             dappid: req.query.dappid
+         }
+     });
+     if(!verificationFee) return {
+         isSuccess: false,
+         message: "Verification Fee is not defined"
+     }
+
+     var charge = await getCharge(dapp);
+    
+     return {
+         isSuccess: true,
+         fee: verificationFee.fee,
+         belfricsCharge: charge.serviceFee
+     }
+ });

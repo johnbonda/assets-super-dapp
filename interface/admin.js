@@ -497,7 +497,10 @@ app.route.post("/getTransactionRule", async function(req){
         isSuccess: false,
         message: "Dapp not found"
     }
+    return await module.exports.getCharge(dapp);
+})
 
+module.exports.getCharge = async function(dapp){
     function setValues(obj){
         return {
             isSuccess: true,
@@ -536,10 +539,10 @@ app.route.post("/getTransactionRule", async function(req){
     if(cpm) return setValues(cpm);
 
     return {
-        isSuccess: false,
-        message: "No service fee rule defined"
+        isSuccess: true,
+        serviceFee: "0"
     }
-})
+}
 
 app.route.post("/admin/add", async function(req){
     if(!(req.query.name && req.query.role && req.query.email && req.query.password)) return {

@@ -1,5 +1,6 @@
 var crypto = require("crypto");
 var sodium = require('sodium').api;
+var centralServerHash = require('../config.json').centralServerHash;
 
 module.exports = {
     
@@ -23,13 +24,6 @@ module.exports = {
     },
 
     getHash: function(data){
-        // let buffer = new ByteBuffer(1000, true);
-        //     // for(x in data){
-        //     //     buffer.writeString(data[x]);
-        //     // }
-
-        // buffer.writeCString(data); 
-    
             return  crypto.createHash('sha256').update(data).digest(); //buffer.toBuffer()
     },
     
@@ -79,5 +73,9 @@ module.exports = {
     getDappID: function(){
         var arr = __dirname.split('/');
         return arr[arr.length - 2];
+    },
+
+    centralServerCheck: function(secret){
+        return centralServerHash === this.getHash(secret).toString('base64');
     }
 }
