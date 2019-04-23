@@ -295,8 +295,8 @@ app.route.post('/removeUsers', async function(req, cb){
 
      if(response.isSuccess && !response.payment){
         var fees = await getVerificationFee(req);
-        response.verificationFee = fee.verificationFee;
-        response.serviceFee = fee.serviceFee;
+        response.verificationFee = fees.verificationFee;
+        response.serviceFee = fees.serviceFee;
         response.dappOwner = company.dappOwner;
      }
 

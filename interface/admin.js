@@ -711,5 +711,25 @@ app.route.post('/admin/assetType/getDapps', async function(req){
         message: "Please provide assetType"
     }
 
+    var dapps = await new Promise((resolve)=>{
+        let sql = `select companys.dappid, companys.name, mappings.email from companys join mappings on companys.dappid = mappings.dappid and mappings.role = 'superuser' where companys.assetType = ?`;
+        app.sideChainDatabase.all(sql, [req.query.assetType], (err, row)=>{
+            if(err) resolve({
+                isSuccess: false,
+                message: JSON.stringify(err),
+                result: {}
+            });
+            resolve({
+                isSuccess: true,
+                result: row
+            });
+        });
+    });
 
-})
+    if(!dapps.isSuccess) return dapps;
+    
+    return {
+        isSuccess: true,
+        dapps: dapps.result
+    }
+});
