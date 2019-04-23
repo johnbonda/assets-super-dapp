@@ -499,6 +499,8 @@ app.route.post("/setTransactionRule", async function(req) {
         isSuccess: false,
         message: "Need to specify dappid or assetType or country to set rule"
     }
+
+    await blockWait();
     return {
         isSuccess: true
     }
@@ -621,43 +623,6 @@ app.route.post("/admin/delete", async function(req){
     }
 })
 
-// app.route.post("/admin/edit", async function(req){
-//     var admin = await app.model.Admin.findOne({
-//         condition: {
-//             adminid: req.query.adminid,
-//             deleted: '0'
-//         }
-//     });
-//     if(!admin) return {
-//         isSuccess: false,
-//         message: "Admin not found"
-//     }
-
-//     app.sdb.update('admin', {
-//         privilegesView: req.query.privilegesView || admin.privilegesView
-//     },{
-//         adminid: req.query.adminid
-//     });
-//     app.sdb.update('admin', {
-//         privilegesEdit: req.query.privilegesEdit || admin.privilegesEdit
-//     },{
-//         adminid: req.query.adminid
-//     });
-//     app.sdb.update('admin', {
-//         privilegesAdd: req.query.privilegesAdd || admin.privilegesAdd
-//     },{
-//         adminid: req.query.adminid
-//     });
-//     app.sdb.update('admin', {
-//         privilegesDelete: req.query.privilegesDelete || admin.privilegesDelete
-//     },{
-//         adminid: req.query.adminid
-//     });
-//     return {
-//         isSuccess: true
-//     }
-// });
-
 app.route.post('/admins', async function(req){
     var condition = {
         deleted: '0'
@@ -738,4 +703,13 @@ app.route.post('/admin/geDappNamesIds', async function(req){
         isSuccess: true,
         dapps: result
     }
+});
+
+app.route.post('/admin/assetType/getDapps', async function(req){
+    if(!req.query.assetType) return {
+        isSuccess: false,
+        message: "Please provide assetType"
+    }
+
+
 })
