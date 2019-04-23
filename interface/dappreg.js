@@ -293,6 +293,13 @@ app.route.post('/removeUsers', async function(req, cb){
          isSuccess: false
      }
 
+     if(response.isSuccess && !response.payment){
+        var fees = await getVerificationFee(req);
+        response.verificationFee = fee.verificationFee;
+        response.serviceFee = fee.serviceFee;
+        response.dappOwner = company.dappOwner;
+     }
+
      return response;
      
  })
@@ -365,7 +372,9 @@ app.route.post('/removeUsers', async function(req, cb){
      }
  });
 
- app.route.post('/getVerificationFee', async function(req){
+ app.route.post('/getVerificationFee', getVerificationFee);
+
+ async function getVerificationFee(req){
     var dapp = await app.model.Company.findOne({
         condition: {
             dappid: req.query.dappid
@@ -380,16 +389,81 @@ app.route.post('/removeUsers', async function(req, cb){
              dappid: req.query.dappid
          }
      });
-     if(!verificationFee) return {
-         isSuccess: false,
-         message: "Verification Fee is not defined"
+     if(!verificationFee) verificationFee = {
+         fee: "0"
      }
 
      var charge = await getCharge(dapp);
     
      return {
          isSuccess: true,
-         fee: verificationFee.fee,
-         belfricsCharge: charge.serviceFee
+         verificationFee: verificationFee.fee,
+         serviceFee: charge.serviceFee
+     }
+ }
+
+ app.route.post("/getAllServiceFeesDefined", async function(req){
+     var condition = {
+         deleted: '0'
+     }
+     var dtms = await app.model.Dtm.findAll({
+         condition: condition
+     });
+     var atms = await app.model.Atm.findAll({
+         condition: condition
+     });
+     var ctms = await app.model.Ctm.findAll({
+         condition: condition
+     });
+     return {
+         isSuccess: true,
+         dappsFees: dtms,
+         assetTypeFees: atms,
+         countryFees: ctms
      }
  });
+
+ app.route.post('/getServiceFees', async function(req){
+    var create = {
+        deleted: '0'
+    }
+
+    var notFound = {
+        isSuccess: false,
+        message: "No service fee defined"
+    }
+
+    function setValues(obj){
+        return {
+            isSuccess: true,
+            serviceFee: obj.serviceFee
+        }
+    }
+    var find;
+    if (req.query.dappid){
+        create.dappid = req.query.dappid;
+
+        find = await app.model.Dtm.findOne({
+            condition: create
+        });
+    } else if(req.query.assetType){
+        create.assetType=req.query.assetType;
+        create.country = req.query.country || '-';
+
+        find = await app.model.Atm.findOne({
+            condition: create
+        });
+    } else if(req.query.country){
+        create.country = req.query.country;
+        
+        find = await app.model.Ctm.findOne({
+            condition: create
+        });
+    }  else return {
+        isSuccess: false,
+        message: "Need to specify dappid or assetType or country to get fee"
+    }
+
+    if(!find) return notFound;
+    return setValues(find);
+ })

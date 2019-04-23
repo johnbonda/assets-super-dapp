@@ -449,35 +449,52 @@ app.route.post("/setTransactionRule", async function(req) {
         message: "Please provide serviceFee value"
     }
     var create = {
-        serviceFee: req.query.serviceFee,
         deleted: '0'
     }
-    var error = {
-        isSuccess: false,
-        message: "Same rule already exists"
-    }
+    
     if(req.query.assetType){
         create.assetType=req.query.assetType;
         create.country = req.query.country || '-';
 
-        let exists = await app.model.Atm.exists(create);
-        if(exists) return  error;
-
-        app.sdb.create('atm', create);
+        let find = await app.model.Atm.findOne({
+            condition: create
+        });
+        if(find) {
+            app.sdb.update('atm', {
+                serviceFee: req.query.serviceFee
+            }, create);
+        } else {
+            create.serviceFee = req.query.serviceFee;
+            app.sdb.create('atm', create);
+        }
     } else if(req.query.country){
         create.country = req.query.country;
         
-        let exists = await app.model.Ctm.exists(create);
-        if(exists) return error;
-
-        app.sdb.create('ctm', create);
+        let find = await app.model.Ctm.findOne({
+            condition: create
+        });
+        if(find) {
+            app.sdb.update('ctm', {
+                serviceFee: req.query.serviceFee
+            }, create);
+        } else {
+            create.serviceFee = req.query.serviceFee;
+            app.sdb.create('ctm', create);
+        }
     } else if (req.query.dappid){
         create.dappid = req.query.dappid;
 
-        let exists = await app.model.Dtm.exists(create);
-        if(exists) return error;
-
-        app.sdb.create('dtm', create);
+        let find = await app.model.Dtm.findOne({
+            condition: create
+        });
+        if(find) {
+            app.sdb.update('dtm', {
+                serviceFee: req.query.serviceFee
+            }, create);
+        } else {
+            create.serviceFee = req.query.serviceFee;
+            app.sdb.create('dtm', create);
+        }
     } else return {
         isSuccess: false,
         message: "Need to specify dappid or assetType or country to set rule"
