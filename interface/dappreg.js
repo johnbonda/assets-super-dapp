@@ -300,6 +300,8 @@ app.route.post('/removeUsers', async function(req, cb){
         response.dappOwner = company.dappOwner;
      }
 
+     response.assetType = company.assetType;
+
      return response;
      
  })
