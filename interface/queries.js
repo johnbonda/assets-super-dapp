@@ -59,7 +59,8 @@ app.route.post('/user/dappid2', async function(req){
         } catch(err){
             dapps.result[i].launched = false;
         }
-        dapps.result[i].launched = response.isSuccess;
+        if(!response) dapps.result[i].launched = false;
+        else dapps.result[i].launched = response.isSuccess;
     }
 
     return {
