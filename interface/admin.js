@@ -733,3 +733,32 @@ app.route.post('/admin/assetType/getDapps', async function(req){
         dapps: dapps.result
     }
 });
+
+app.route.post('/admin/getIncomes', async function(req){
+    var dapps = await app.model.Company.findAll({
+        fields: ['dappid']
+    });
+    var adminEarnings = 0;
+    var ownerEarnings = 0;
+    var transactionFeesEarned = 0;
+    for(i in dapps){
+        try{
+
+        var response = await dappCall.call('PUT', `/admin/incomes`, dapp_params);
+
+        } catch(err){
+            continue;
+        }
+        if(!response) continue;
+        adminEarnings += response.adminEarnings;
+        ownerEarnings += response.ownerEarnings;
+        transactionFeesEarned += response.transactionFeesEarned;
+    }
+
+    return {
+        isSuccess: true,
+        adminEarnings: adminEarnings,
+        ownerEarnings: ownerEarnings,
+        transactionFeesEarned: transactionFeesEarned
+    }
+});
