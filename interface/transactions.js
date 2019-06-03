@@ -41,6 +41,13 @@ app.route.post('/dapps/getTransactionFees', async function(req){
         isSuccess: false,
         message: "Dapp does not exist"
     }
+    
+    var email = await app.model.Mapping.findOne({
+        condition: {
+            dappid: req.query.dappid,
+            role: "superuser"
+        }
+    });
 
     var total = await app.model.Dappsfee.count({
         dappid: req.query.dappid,
@@ -59,7 +66,8 @@ app.route.post('/dapps/getTransactionFees', async function(req){
     return {
         isSuccess: true,
         fee: fee,
-        dappOwner: company.dappOwner
+        dappOwner: company.dappOwner,
+        email: email.email
     }
 })
 

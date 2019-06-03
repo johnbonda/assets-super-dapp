@@ -99,8 +99,8 @@ module.exports.registerDapp = async function (req, res) {
     var randomText = getRandomString();
     randomText += ".zip";
     
-    var link = "http://52.201.227.220:8080/sendzip/" + randomText;
-    if(req.query.assetType) link = "http://52.201.227.220:8080/sendzip2/" + randomText;
+    var link = links.centralServer + "/sendzip/" + randomText;
+    if(req.query.assetType) link = links.centralServer + "/sendzip2/" + randomText;
     var dapp_params = {
         secret: req.query.secret,
         category: 1,
@@ -153,6 +153,51 @@ module.exports.registerDapp = async function (req, res) {
     return response;
 }
 
+async function setIssueLimit(req){
+    if(!req.query.centralServerKey) return {
+        isSuccess: false,
+        message: "Need to provide the centralServerKey, issue limit not updated."
+    }
+    if(!util.centralServerCheck(req.query.centralServerKey)) return {
+        isSuccess: false,
+        message: "Central Server authentication failed, issue limit not updated."
+    }         
+    if(!req.query.email) return {
+        isSuccess: false,
+        message: "Need to provide the superuser's email"
+    }
+    if(!req.query.limit) return {
+        isSuccess: false,
+        message: "Need to provide a new limit."
+    }
+    try{
+        req.query.limit = Number(req.query.limit);
+    } catch(err){
+        return {
+            isSuccess: false,
+            message: "Limit should be a number"
+        }
+    }
+    var emailMapping = await app.model.Mapping.findOne({
+        condition: {
+            email: req.query.email,
+            role: "superuser"
+        }
+    });
+    if(!emailMapping) return {
+        isSuccess: false,
+        message: "Email is not a superuser"
+    }
+    var response = await dappCall.call('POST', `/api/dapps/` + emailMapping.dappid + `/centralserver/addIssuelimits`, req.query);
+    if(!response) return {
+        isSuccess: false,
+        message: "Could not connect to the DApp, status not updated"
+    }
+    return response;
+}
+
+app.route.post("/centralserver/addIssuelimits", setIssueLimit);
+
 module.exports.installDapp = async function (req, res) {
     console.log("Entering dapp install");
     app.logger.log("******* Entering dapp install ********");
@@ -189,6 +234,7 @@ app.route.post('/makeDapp', async function(req, cb){
         })
     }
 
+    if(!req.query.centralServerKey)
     console.log("Started Dapp Register");
     var dappRegisterResult = await module.exports.registerDapp(req, cb);
     console.log("Dapp register result: " + JSON.stringify(dappRegisterResult));
